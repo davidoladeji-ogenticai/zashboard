@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { HistoricalData } from '@/types/analytics'
 import { subDays, format } from 'date-fns'
+import { analyticsStore } from '@/lib/analytics-store'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,36 +20,60 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || '30d'
     const metric = searchParams.get('metric') || 'dau'
 
-    // Generate mock historical data
+    // Get real historical data from stored events
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
-    const dataPoints = []
+    const historicalMetrics = analyticsStore.getHistoricalMetrics(days)
     
-    for (let i = days - 1; i >= 0; i--) {
-      const date = subDays(new Date(), i)
+    // Convert to expected format
+    const dataPoints = historicalMetrics.daily_metrics.map(dayMetric => {
       let value = 0
       
       switch (metric) {
         case 'dau':
-          value = Math.floor(Math.random() * 1000) + 500 + (Math.sin(i * 0.1) * 100)
+          value = dayMetric.active_users
           break
         case 'mau':
-          value = Math.floor(Math.random() * 10000) + 5000
+          value = dayMetric.active_users * 7 // Estimate MAU from DAU
           break
         case 'sessions':
-          value = Math.floor(Math.random() * 2000) + 1000
+          value = dayMetric.new_sessions
           break
         default:
-          value = Math.floor(Math.random() * 100) + 50
+          value = dayMetric.active_users
       }
 
-      dataPoints.push({
+      const date = new Date(dayMetric.date)
+      return {
         date: format(date, 'yyyy-MM-dd'),
         value: Math.max(0, value),
         metadata: {
           day_of_week: format(date, 'EEEE'),
-          is_weekend: [0, 6].includes(date.getDay())
+          is_weekend: [0, 6].includes(date.getDay()),
+          avg_session_duration: dayMetric.avg_session_duration
         }
-      })
+      }
+    })
+
+    // Fill in missing days with zero values if no real data
+    if (dataPoints.length < days) {
+      for (let i = days - 1; i >= 0; i--) {
+        const date = subDays(new Date(), i)
+        const dateStr = format(date, 'yyyy-MM-dd')
+        
+        if (!dataPoints.find(dp => dp.date === dateStr)) {
+          dataPoints.push({
+            date: dateStr,
+            value: 0,
+            metadata: {
+              day_of_week: format(date, 'EEEE'),
+              is_weekend: [0, 6].includes(date.getDay())
+            }
+          })
+        }
+      }
+      
+      // Sort by date
+      dataPoints.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     }
 
     const totalValue = dataPoints.reduce((sum, point) => sum + point.value, 0)

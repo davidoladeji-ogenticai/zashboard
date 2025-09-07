@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { EventPayload } from '@/types/analytics'
-
-// In-memory storage for demo (replace with database in production)
-const events: EventPayload[] = []
+import { analyticsStore } from '@/lib/analytics-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,7 +58,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    events.push(event)
+    analyticsStore.addEvent(event)
 
     // Log event for debugging
     console.log('Analytics event received:', {
@@ -104,7 +102,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Return recent events for debugging
-  const recentEvents = events.slice(-50).map(event => ({
+  const recentEvents = analyticsStore.getRecentEvents(50).map(event => ({
     event: event.event,
     user_id: event.properties.user_id,
     app_version: event.properties.app_version,
@@ -113,7 +111,7 @@ export async function GET(request: NextRequest) {
   }))
 
   return NextResponse.json({
-    total_events: events.length,
+    total_events: analyticsStore.getTotalEvents(),
     recent_events: recentEvents
   })
 }

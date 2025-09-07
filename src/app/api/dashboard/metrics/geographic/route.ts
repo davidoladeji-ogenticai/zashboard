@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { RealtimeMetrics } from '@/types/analytics'
 import { analyticsStore } from '@/lib/analytics-store'
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin authentication (replace with proper auth in production)
+    // Verify admin authentication
     const authHeader = request.headers.get('authorization')
     const expectedToken = process.env.ZING_ANALYTICS_KEY || 'demo-key'
     
@@ -15,18 +14,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get real-time metrics from stored events
-    const realtimeMetrics: RealtimeMetrics = analyticsStore.getRealtimeMetrics()
+    // Get real geographic metrics from stored events
+    const geographicMetrics = analyticsStore.getGeographicMetrics()
 
-    return NextResponse.json(realtimeMetrics)
+    return NextResponse.json({
+      regions: geographicMetrics,
+      total_countries: geographicMetrics.length,
+      last_updated: new Date().toISOString()
+    })
 
   } catch (error) {
-    console.error('Realtime metrics error:', error)
+    console.error('Geographic metrics error:', error)
     
     return NextResponse.json(
       {
         error: 'Internal server error',
-        message: 'Failed to fetch realtime metrics',
+        message: 'Failed to fetch geographic metrics',
         code: 'INTERNAL_ERROR'
       },
       { status: 500 }
