@@ -1,0 +1,252 @@
+'use client'
+
+import { Sidebar } from '@/components/sidebar'
+import { Header } from '@/components/header'
+import { MetricCard } from '@/components/metric-card'
+import {
+  Database,
+  Server,
+  Wifi,
+  HardDrive,
+  Cpu,
+  Activity,
+  CheckCircle,
+  AlertTriangle
+} from 'lucide-react'
+
+export default function SystemPage() {
+  const systemComponents = [
+    { name: 'Analytics API', status: 'healthy', uptime: '99.97%', responseTime: '142ms' },
+    { name: 'Database', status: 'healthy', uptime: '99.99%', responseTime: '23ms' },
+    { name: 'Event Processor', status: 'healthy', uptime: '99.95%', responseTime: '89ms' },
+    { name: 'Dashboard Frontend', status: 'healthy', uptime: '100%', responseTime: '67ms' },
+    { name: 'Authentication Service', status: 'warning', uptime: '99.12%', responseTime: '234ms' },
+    { name: 'Backup System', status: 'healthy', uptime: '99.88%', responseTime: '1.2s' },
+  ]
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+      case 'critical':
+        return <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+      default:
+        return <Activity className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+      case 'warning':
+        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+      case 'critical':
+        return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+      default:
+        return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20'
+    }
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      <Sidebar />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        
+        <main className="flex-1 overflow-y-auto p-6">
+          {/* Page Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              System Health
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Infrastructure monitoring and system performance overview
+            </p>
+          </div>
+
+          {/* System Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <MetricCard
+              title="System Uptime"
+              value="99.97%"
+              change={0.12}
+              changeLabel="this month"
+              icon={Server}
+              trend="up"
+            />
+            <MetricCard
+              title="API Response"
+              value="142ms"
+              change={-15.3}
+              changeLabel="avg improvement"
+              icon={Activity}
+              trend="up"
+            />
+            <MetricCard
+              title="Database Load"
+              value="23%"
+              change={-8.7}
+              changeLabel="vs last week"
+              icon={Database}
+              trend="up"
+            />
+            <MetricCard
+              title="Storage Used"
+              value="2.3TB"
+              change={12.4}
+              changeLabel="growth rate"
+              icon={HardDrive}
+              trend="neutral"
+            />
+          </div>
+
+          {/* System Components Status */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+              System Components Status
+            </h3>
+            <div className="space-y-4">
+              {systemComponents.map((component, index) => (
+                <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-4">
+                    {getStatusIcon(component.status)}
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">{component.name}</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Response: {component.responseTime}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(component.status)}`}>
+                      {component.status}
+                    </span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {component.uptime} uptime
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Resource Usage */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Resource Utilization
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600 dark:text-gray-400">CPU Usage</span>
+                    <span className="font-medium">23%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full" style={{ width: '23%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600 dark:text-gray-400">Memory Usage</span>
+                    <span className="font-medium">67%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-yellow-600 dark:bg-yellow-400 h-2 rounded-full" style={{ width: '67%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600 dark:text-gray-400">Disk Usage</span>
+                    <span className="font-medium">45%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-green-600 dark:bg-green-400 h-2 rounded-full" style={{ width: '45%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600 dark:text-gray-400">Network I/O</span>
+                    <span className="font-medium">12%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-purple-600 dark:bg-purple-400 h-2 rounded-full" style={{ width: '12%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Performance Metrics
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Requests/sec</span>
+                  <span className="font-bold text-lg">1,247</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Error Rate</span>
+                  <span className="font-bold text-lg text-green-600 dark:text-green-400">0.08%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Avg Response Time</span>
+                  <span className="font-bold text-lg">142ms</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Active Connections</span>
+                  <span className="font-bold text-lg">2,341</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Infrastructure Overview */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+              Infrastructure Overview
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <Server className="h-12 w-12 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-1">Web Servers</h4>
+                <p className="text-sm text-blue-600 dark:text-blue-400">3 instances running</p>
+                <span className="inline-block mt-2 px-2 py-1 bg-green-100 dark:bg-green-800/30 text-green-800 dark:text-green-200 text-xs rounded">
+                  Healthy
+                </span>
+              </div>
+              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <Database className="h-12 w-12 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                <h4 className="font-semibold text-green-800 dark:text-green-200 mb-1">Database</h4>
+                <p className="text-sm text-green-600 dark:text-green-400">PostgreSQL cluster</p>
+                <span className="inline-block mt-2 px-2 py-1 bg-green-100 dark:bg-green-800/30 text-green-800 dark:text-green-200 text-xs rounded">
+                  Healthy
+                </span>
+              </div>
+              <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <Wifi className="h-12 w-12 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
+                <h4 className="font-semibold text-purple-800 dark:text-purple-200 mb-1">CDN</h4>
+                <p className="text-sm text-purple-600 dark:text-purple-400">Global edge network</p>
+                <span className="inline-block mt-2 px-2 py-1 bg-green-100 dark:bg-green-800/30 text-green-800 dark:text-green-200 text-xs rounded">
+                  Optimal
+                </span>
+              </div>
+              <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <HardDrive className="h-12 w-12 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
+                <h4 className="font-semibold text-orange-800 dark:text-orange-200 mb-1">Storage</h4>
+                <p className="text-sm text-orange-600 dark:text-orange-400">2.3TB / 10TB used</p>
+                <span className="inline-block mt-2 px-2 py-1 bg-green-100 dark:bg-green-800/30 text-green-800 dark:text-green-200 text-xs rounded">
+                  23% Used
+                </span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  )
+}

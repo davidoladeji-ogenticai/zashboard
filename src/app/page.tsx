@@ -3,6 +3,7 @@
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
+import { useRealtimeMetrics, useAnalyticsHealth } from '@/hooks/useAnalytics'
 import {
   Users,
   Activity,
@@ -11,10 +12,38 @@ import {
   Download,
   Clock,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from 'lucide-react'
 
 export default function Home() {
+  const { data: realtimeData, isLoading: isLoadingRealtime, error: realtimeError } = useRealtimeMetrics()
+  const { data: healthData, isLoading: isLoadingHealth } = useAnalyticsHealth()
+
+  if (realtimeError) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Failed to Load Analytics Data
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {realtimeError.message}
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
@@ -35,38 +64,56 @@ export default function Home() {
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <MetricCard
-              title="Active Users"
-              value={12543}
-              change={8.2}
-              changeLabel="vs last week"
-              icon={Users}
-              trend="up"
-            />
-            <MetricCard
-              title="Sessions Today"
-              value={3421}
-              change={-2.1}
-              changeLabel="vs yesterday"
-              icon={Activity}
-              trend="down"
-            />
-            <MetricCard
-              title="Global Reach"
-              value="89 countries"
-              change={3}
-              changeLabel="new this month"
-              icon={Globe}
-              trend="up"
-            />
-            <MetricCard
-              title="Version 1.3.5"
-              value="84%"
-              change={12.5}
-              changeLabel="adoption rate"
-              icon={TrendingUp}
-              trend="up"
-            />
+            {isLoadingRealtime ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <div className="animate-pulse">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                      <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <MetricCard
+                  title="Active Users Now"
+                  value={realtimeData?.active_users_now ?? 0}
+                  change={8.2}
+                  changeLabel="vs last week"
+                  icon={Users}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Active Sessions"
+                  value={realtimeData?.active_sessions ?? 0}
+                  change={-2.1}
+                  changeLabel="vs yesterday"
+                  icon={Activity}
+                  trend="down"
+                />
+                <MetricCard
+                  title="Users Last Hour"
+                  value={realtimeData?.users_last_hour ?? 0}
+                  change={3}
+                  changeLabel="hourly growth"
+                  icon={Globe}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Current Version"
+                  value={realtimeData?.current_version_users ?? 0}
+                  change={12.5}
+                  changeLabel="users updated"
+                  icon={TrendingUp}
+                  trend="up"
+                />
+              </>
+            )}
           </div>
 
           {/* Additional Metrics Row */}
@@ -139,26 +186,39 @@ export default function Home() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               System Status
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Analytics API: Operational
-                </span>
+            {isLoadingHealth ? (
+              <div className="animate-pulse">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-3">
+                      <div className="h-3 w-3 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Database: Healthy
-                </span>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`h-3 w-3 ${healthData?.status === 'healthy' ? 'bg-green-500' : 'bg-red-500'} rounded-full`}></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Analytics API: {healthData?.status === 'healthy' ? 'Operational' : 'Down'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className={`h-3 w-3 ${healthData?.database === 'connected' ? 'bg-green-500' : 'bg-red-500'} rounded-full`}></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Database: {healthData?.database === 'connected' ? 'Healthy' : 'Disconnected'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="h-3 w-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Dashboard: Online ({healthData?.uptime ? Math.round(healthData.uptime) : 0}s uptime)
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Data Processing: Minor delays
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </main>
       </div>
