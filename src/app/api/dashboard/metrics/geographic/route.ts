@@ -14,13 +14,30 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get real geographic metrics from stored events
-    const geographicMetrics = analyticsStore.getGeographicMetrics()
+    // Get enhanced geographic metrics from stored events
+    const geographicMetrics = analyticsStore.getEnhancedGeographicMetrics()
 
-    return NextResponse.json({
-      regions: geographicMetrics,
-      total_countries: geographicMetrics.length,
-      last_updated: new Date().toISOString()
+    const response = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      data: geographicMetrics,
+      // Legacy compatibility
+      regions: geographicMetrics.countries_data,
+      total_countries: geographicMetrics.summary.total_countries,
+      // Additional metadata for the frontend
+      metadata: {
+        endpoint: 'geographic',
+        version: '1.0.0',
+        cache_duration: 600 // 10 minutes
+      }
+    }
+
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
+        'Content-Type': 'application/json',
+        'X-API-Version': '1.0.0'
+      }
     })
 
   } catch (error) {

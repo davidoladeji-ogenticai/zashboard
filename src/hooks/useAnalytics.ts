@@ -192,3 +192,25 @@ export function usePerformanceMetrics() {
     staleTime: 90000, // Consider data stale after 90 seconds
   })
 }
+
+// Enhanced geographic metrics hook
+export function useEnhancedGeographicData() {
+  return useQuery({
+    queryKey: ['dashboard', 'metrics', 'geographic', 'enhanced'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/dashboard/metrics/geographic`, {
+        headers: apiHeaders
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch geographic data: ${response.status} ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      return data.data // Return the enhanced geographic data
+    },
+    refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes (geographic data changes slowly)
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
+  })
+}
