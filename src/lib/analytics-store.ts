@@ -800,6 +800,59 @@ class AnalyticsStore {
     }
   }
 
+  // Get system health metrics
+  getSystemMetrics() {
+    const now = Date.now()
+    const oneHourAgo = now - (60 * 60 * 1000)
+    const oneDayAgo = now - (24 * 60 * 60 * 1000)
+    
+    // Get recent events for analysis
+    const recentEvents = this.events.filter(event => 
+      event.properties.timestamp && event.properties.timestamp > oneHourAgo
+    )
+    
+    const dailyEvents = this.events.filter(event => 
+      event.properties.timestamp && event.properties.timestamp > oneDayAgo
+    )
+
+    // Calculate basic system metrics
+    const eventsPerMinute = recentEvents.length / 60
+    const avgEventsPerHour = dailyEvents.length / 24
+    
+    // Calculate response times
+    const responseTimes = dailyEvents
+      .filter(event => event.properties.response_time)
+      .map(event => event.properties.response_time)
+    const avgResponseTime = responseTimes.length > 0 
+      ? responseTimes.reduce((acc, time) => acc + time, 0) / responseTimes.length 
+      : 0
+
+    // Error tracking
+    const errorEvents = dailyEvents.filter(event => 
+      event.event.includes('error') || event.properties.error
+    )
+    const errorRate = dailyEvents.length > 0 ? (errorEvents.length / dailyEvents.length) * 100 : 0
+
+    // System uptime calculation
+    const oldestEvent = this.events.length > 0 
+      ? Math.min(...this.events.map(e => e.properties.timestamp || now).filter(Boolean))
+      : now
+    const uptimeMs = now - oldestEvent
+
+    return {
+      uptime_ms: uptimeMs,
+      events_per_minute: Math.round(eventsPerMinute * 10) / 10,
+      avg_events_per_hour: Math.round(avgEventsPerHour * 10) / 10,
+      avg_response_time: Math.round(avgResponseTime),
+      error_rate: Math.round(errorRate * 100) / 100,
+      total_events: this.events.length,
+      recent_events_count: recentEvents.length,
+      error_count: errorEvents.length,
+      oldest_event_timestamp: oldestEvent,
+      last_updated: new Date().toISOString()
+    }
+  }
+
   // Clear old events (for maintenance)
   clearOldEvents(olderThan: number) {
     this.events = this.events.filter(event => 

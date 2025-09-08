@@ -214,3 +214,25 @@ export function useEnhancedGeographicData() {
     staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
   })
 }
+
+// System health metrics hook
+export function useSystemMetrics() {
+  return useQuery({
+    queryKey: ['dashboard', 'metrics', 'system'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/dashboard/metrics/system`, {
+        headers: apiHeaders
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch system metrics: ${response.status} ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      return data.data // Return the system health data
+    },
+    refetchInterval: 60000, // Refetch every minute for system monitoring
+    retry: 2,
+    staleTime: 30000, // Consider data stale after 30 seconds
+  })
+}
