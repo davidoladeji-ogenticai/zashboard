@@ -145,7 +145,7 @@ class AnalyticsStore {
       country: regionMap[platform] || 'Other',
       users: users.size,
       sessions: Math.floor(users.size * 1.2), // Estimate sessions
-      growth: Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 5 : -(Math.floor(Math.random() * 10))
+      growth: 0
     }))
   }
 
@@ -550,7 +550,7 @@ class AnalyticsStore {
       event.event === 'zing_app_crash' || event.properties.crash_type
     ).length
     
-    const crashRate = totalSessions > 0 ? (crashEvents / totalSessions) * 100 : 0.08
+    const crashRate = totalSessions > 0 ? (crashEvents / totalSessions) * 100 : 0
 
     // Performance benchmarks with status determination
     const benchmarks = [
@@ -561,7 +561,7 @@ class AnalyticsStore {
         target_value: 3.0,
         target: '< 3s',
         status: avgStartupTime < 3.0 ? (avgStartupTime < 2.0 ? 'excellent' : 'good') : 'warning',
-        improvement_percent: -15.2 // Generally improving
+        improvement_percent: 0
       },
       {
         name: 'Memory Usage', 
@@ -570,7 +570,7 @@ class AnalyticsStore {
         target_value: 200,
         target: '< 200MB',
         status: avgMemoryUsage < 200 ? 'good' : 'warning',
-        improvement_percent: 8.4
+        improvement_percent: 0
       },
       {
         name: 'Response Time',
@@ -579,7 +579,7 @@ class AnalyticsStore {
         target_value: 200,
         target: '< 200ms',
         status: avgResponseTime < 100 ? 'excellent' : avgResponseTime < 200 ? 'good' : 'warning',
-        improvement_percent: -22.1 // Improving
+        improvement_percent: 0
       },
       {
         name: 'Crash Rate',
@@ -588,25 +588,25 @@ class AnalyticsStore {
         target_value: 0.1,
         target: '< 0.1%',
         status: crashRate < 0.1 ? 'excellent' : crashRate < 0.5 ? 'good' : 'warning',
-        improvement_percent: -45.6
+        improvement_percent: 0
       },
       {
         name: 'CPU Usage',
-        value: '8.2%',
-        current_value: 8.2,
+        value: '0%',
+        current_value: 0,
         target_value: 15,
         target: '< 15%',
         status: 'good',
-        improvement_percent: -12.3
+        improvement_percent: 0
       },
       {
         name: 'Error Rate', 
-        value: '0.12%',
-        current_value: 0.12,
+        value: '0%',
+        current_value: 0,
         target_value: 0.5,
         target: '< 0.5%',
         status: 'good',
-        improvement_percent: -18.5
+        improvement_percent: 0
       }
     ]
 
@@ -634,10 +634,10 @@ class AnalyticsStore {
       performance_benchmarks: benchmarks,
       overall_health: overallHealth,
       metrics_summary: {
-        startup_time_improvement: -15.2,
-        memory_usage_change: 8.4,
-        response_time_improvement: -22.1,
-        crash_rate_reduction: -45.6
+        startup_time_improvement: 0,
+        memory_usage_change: 0,
+        response_time_improvement: 0,
+        crash_rate_reduction: 0
       },
       last_updated: new Date().toISOString(),
       data_points: performanceEvents.length
@@ -726,12 +726,12 @@ class AnalyticsStore {
       )
       const sessions = Math.max(userCount, Math.floor(platformEvents.length * 1.2))
 
-      // Simulate growth rates based on platform popularity
+      // Use zero growth rates (no fallback data)
       const growthRates: Record<string, number> = {
-        'darwin': 12.3,   // macOS growing
-        'win32': 8.7,     // Windows steady
-        'linux': 15.2,    // Linux growing fast
-        'unknown': -2.3   // Unknown declining
+        'darwin': 0,
+        'win32': 0,
+        'linux': 0,
+        'unknown': 0
       }
       
       countriesData.push({
@@ -739,7 +739,7 @@ class AnalyticsStore {
         users: userCount,
         percentage: Math.round(percentage * 10) / 10,
         flag: countryFlags[country] || '🌍',
-        growth: growthRates[platform] || 5.0,
+        growth: growthRates[platform] || 0,
         sessions,
         platform_source: platform
       })
@@ -764,7 +764,7 @@ class AnalyticsStore {
           users,
           percentage: Math.round(percentage * 10) / 10,
           flag,
-          growth: Math.random() > 0.5 ? Math.floor(Math.random() * 20) + 5 : -(Math.floor(Math.random() * 10)),
+          growth: 0,
           sessions: Math.floor(users * 1.3),
           platform_source: 'estimated'
         })
@@ -775,8 +775,8 @@ class AnalyticsStore {
     countriesData.sort((a, b) => b.users - a.users)
 
     // Calculate summary metrics
-    const totalCountries = countriesData.length + Math.floor(Math.random() * 20) + 60 // Add some more for realism
-    const totalCities = countriesData.reduce((sum, country) => sum + Math.floor(country.users * 0.3), 0) + 800
+    const totalCountries = countriesData.length
+    const totalCities = countriesData.reduce((sum, country) => sum + Math.floor(country.users * 0.3), 0)
     const topCountry = countriesData[0]
     const growingRegions = countriesData.filter(c => c.growth > 0).length
 

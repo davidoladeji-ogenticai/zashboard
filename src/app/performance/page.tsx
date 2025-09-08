@@ -44,15 +44,8 @@ export default function PerformancePage() {
     )
   }
 
-  // Use real data or fallback values
-  const performanceMetrics = performanceData?.performance_benchmarks || [
-    { name: 'Startup Time', value: '2.3s', status: 'good', target: '< 3s' },
-    { name: 'Memory Usage', value: '156MB', status: 'warning', target: '< 200MB' },
-    { name: 'CPU Usage', value: '8.2%', status: 'good', target: '< 15%' },
-    { name: 'Response Time', value: '127ms', status: 'excellent', target: '< 200ms' },
-    { name: 'Crash Rate', value: '0.08%', status: 'excellent', target: '< 0.1%' },
-    { name: 'Error Rate', value: '0.12%', status: 'good', target: '< 0.5%' }
-  ]
+  // Use real data or empty array if no data available
+  const performanceMetrics = performanceData?.performance_benchmarks || []
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -116,32 +109,32 @@ export default function PerformancePage() {
               <>
                 <MetricCard
                   title="Avg Startup Time"
-                  value={performanceData?.avg_startup_time_formatted ?? "2.3s"}
-                  change={performanceData?.metrics_summary?.startup_time_improvement ?? -15.2}
+                  value={performanceData?.avg_startup_time_formatted ?? "0s"}
+                  change={performanceData?.metrics_summary?.startup_time_improvement ?? 0}
                   changeLabel="improvement"
                   icon={Zap}
                   trend="up"
                 />
                 <MetricCard
                   title="Memory Usage"
-                  value={performanceData?.avg_memory_usage_formatted ?? "156MB"}
-                  change={performanceData?.metrics_summary?.memory_usage_change ?? 8.4}
+                  value={performanceData?.avg_memory_usage_formatted ?? "0MB"}
+                  change={performanceData?.metrics_summary?.memory_usage_change ?? 0}
                   changeLabel="vs last week"
                   icon={Cpu}
                   trend="down"
                 />
                 <MetricCard
                   title="Response Time"
-                  value={performanceData?.avg_response_time_formatted ?? "127ms"}
-                  change={performanceData?.metrics_summary?.response_time_improvement ?? -22.1}
+                  value={performanceData?.avg_response_time_formatted ?? "0ms"}
+                  change={performanceData?.metrics_summary?.response_time_improvement ?? 0}
                   changeLabel="improvement"
                   icon={Activity}
                   trend="up"
                 />
                 <MetricCard
                   title="Crash Rate"
-                  value={performanceData?.crash_rate_formatted ?? "0.08%"}
-                  change={performanceData?.metrics_summary?.crash_rate_reduction ?? -45.6}
+                  value={performanceData?.crash_rate_formatted ?? "0%"}
+                  change={performanceData?.metrics_summary?.crash_rate_reduction ?? 0}
                   changeLabel="reduction"
                   icon={CheckCircle}
                   trend="up"
@@ -207,7 +200,7 @@ export default function PerformancePage() {
                         <td className="py-4"><div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div></td>
                       </tr>
                     ))
-                  ) : (
+                  ) : performanceMetrics.length > 0 ? (
                     performanceMetrics.map((metric, index) => (
                       <tr key={index} className="border-b border-gray-100 dark:border-gray-800">
                         <td className="py-4">
@@ -238,6 +231,12 @@ export default function PerformancePage() {
                         </td>
                       </tr>
                     ))
+                  ) : (
+                    <tr className="border-b border-gray-100 dark:border-gray-800">
+                      <td colSpan={5} className="py-8 text-center text-gray-500 dark:text-gray-400">
+                        No performance metrics available yet. Data will appear once analytics events include performance data.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>

@@ -41,13 +41,8 @@ export default function GeographicPage() {
     )
   }
 
-  // Use real data or fallback data
-  const topCountries = geoData?.countries_data ?? [
-    { country: 'United States', users: 12543, percentage: 28.5, flag: '🇺🇸', growth: 12.3 },
-    { country: 'United Kingdom', users: 8921, percentage: 20.3, flag: '🇬🇧', growth: 8.7 },
-    { country: 'Germany', users: 6754, percentage: 15.4, flag: '🇩🇪', growth: 15.2 },
-    { country: 'Canada', users: 4321, percentage: 9.8, flag: '🇨🇦', growth: 6.1 },
-  ]
+  // Use real data or empty array if no data available
+  const topCountries = geoData?.countries_data ?? []
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -87,16 +82,16 @@ export default function GeographicPage() {
               <>
                 <MetricCard
                   title="Countries"
-                  value={geoData?.summary?.total_countries ?? 89}
-                  change={geoData?.metrics?.countries_with_users ?? 3}
+                  value={geoData?.summary?.total_countries ?? 0}
+                  change={geoData?.metrics?.countries_with_users ?? 0}
                   changeLabel="with users"
                   icon={Globe}
                   trend="up"
                 />
                 <MetricCard
                   title="Cities"
-                  value={geoData?.summary?.total_cities ?? 1247}
-                  change={28}
+                  value={geoData?.summary?.total_cities ?? 0}
+                  change={geoData?.metrics?.estimated_cities ?? 0}
                   changeLabel="estimated"
                   icon={MapPin}
                   trend="up"
@@ -112,7 +107,7 @@ export default function GeographicPage() {
                 <MetricCard
                   title="Growing Regions"
                   value={geoData?.summary?.growing_regions ?? 0}
-                  change={15.4}
+                  change={geoData?.metrics?.growth_acceleration ?? 0}
                   changeLabel="accelerating"
                   icon={TrendingUp}
                   trend="up"
