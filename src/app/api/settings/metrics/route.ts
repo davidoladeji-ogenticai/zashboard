@@ -16,8 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     const allUsers = getAllUsers()
-    const storeData = analyticsStore.getAnalyticsData()
-    const events = storeData.events || []
+    const events = analyticsStore.getEvents()
     
     // Calculate storage metrics from analytics data
     const totalEvents = events.length
