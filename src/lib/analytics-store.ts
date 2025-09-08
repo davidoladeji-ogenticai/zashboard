@@ -178,13 +178,14 @@ class AnalyticsStore {
     versionEvents.forEach(event => {
       const version = event.properties.version || 'unknown'
       const installType = event.properties.install_type
-      const installationId = event.properties.installation_id
+      // Use hardware_id for true uniqueness, fallback to installation_id for backward compatibility
+      const uniqueId = event.properties.hardware_id || event.properties.installation_id
 
-      // Track unique installations per version
+      // Track unique installations per version using hardware-based identification
       if (!versionInstalls.has(version)) {
         versionInstalls.set(version, new Set())
       }
-      versionInstalls.get(version)!.add(installationId)
+      versionInstalls.get(version)!.add(uniqueId)
 
       // Track install types per version
       if (!installTypes.has(version)) {
@@ -203,7 +204,7 @@ class AnalyticsStore {
           if (!versionUpdates.has(version)) {
             versionUpdates.set(version, new Set())
           }
-          versionUpdates.get(version)!.add(installationId)
+          versionUpdates.get(version)!.add(uniqueId)
           break
         case 'reinstall':
           totalReinstalls++
