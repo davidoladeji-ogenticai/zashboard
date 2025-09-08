@@ -109,6 +109,26 @@ export async function sendAnalyticsEvent(eventData: {
   return response.json()
 }
 
+// Fetch version metrics
+export function useVersionMetrics() {
+  return useQuery({
+    queryKey: ['version-metrics'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/dashboard/metrics/versions`, {
+        headers: apiHeaders
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch version metrics: ${response.statusText}`)
+      }
+      
+      return response.json()
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
+  })
+}
+
 // Fetch recent events for debugging (admin only)
 export function useRecentEvents() {
   return useQuery({
