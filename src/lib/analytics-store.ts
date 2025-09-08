@@ -391,7 +391,7 @@ class AnalyticsStore {
 
     const avgSessionDuration = sessionEndsLastWeek.length > 0 ?
       sessionEndsLastWeek.reduce((acc, event) => acc + (event.properties.duration_minutes || 0), 0) / sessionEndsLastWeek.length :
-      24.5 // Fallback average if no session data
+      0 // No session data available
 
     // Calculate growth percentages
     const activeUserGrowth = previousActiveUsers.size > 0 ?
@@ -412,7 +412,7 @@ class AnalyticsStore {
 
     const retentionRate = previousActiveUsers.size > 0 ?
       (retainedUsers.size / previousActiveUsers.size) * 100 :
-      85.2 // Fallback retention rate
+      0 // No retention data available
 
     return {
       total_users: allTimeUsers.size,
@@ -425,7 +425,7 @@ class AnalyticsStore {
       growth_metrics: {
         active_user_growth_percent: Math.round(activeUserGrowth * 10) / 10,
         new_user_growth_percent: Math.round(newUserGrowth * 10) / 10,
-        total_user_growth_percent: allTimeUsers.size > 100 ? 12.3 : 0 // Fallback for small datasets
+        total_user_growth_percent: 0 // No growth data available
       },
       user_activity: this.getUserActivityData(),
       last_updated: new Date().toISOString()
@@ -524,7 +524,7 @@ class AnalyticsStore {
     
     const avgStartupTime = startupTimes.length > 0 
       ? startupTimes.reduce((acc, time) => acc + time, 0) / startupTimes.length / 1000 // Convert to seconds
-      : 2.3 // Fallback value
+      : 0 // No startup time data available
 
     // Calculate memory usage from events
     const memoryUsages = recentEvents
@@ -533,7 +533,7 @@ class AnalyticsStore {
 
     const avgMemoryUsage = memoryUsages.length > 0
       ? memoryUsages.reduce((acc, mem) => acc + mem, 0) / memoryUsages.length
-      : 156 // Fallback value in MB
+      : 0 // No memory usage data available
 
     // Calculate response times
     const responseTimes = recentEvents
@@ -542,7 +542,7 @@ class AnalyticsStore {
 
     const avgResponseTime = responseTimes.length > 0
       ? responseTimes.reduce((acc, time) => acc + time, 0) / responseTimes.length
-      : 127 // Fallback value in ms
+      : 0 // No response time data available
 
     // Calculate crash rate from session data
     const totalSessions = recentEvents.filter(event => event.event === 'zing_session_start').length
