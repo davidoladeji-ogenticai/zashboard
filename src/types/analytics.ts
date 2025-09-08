@@ -81,6 +81,12 @@ export interface EventPayload {
     app_version: string;
     platform: string;
     timestamp: number;
+    // Location data from IP geolocation
+    country_code?: string;
+    country_name?: string;
+    region?: string;
+    city?: string;
+    location_source?: 'geoip' | 'development' | 'unknown';
     [key: string]: any;
   };
 }

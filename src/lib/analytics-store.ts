@@ -1,4 +1,5 @@
 import { EventPayload } from '@/types/analytics'
+import { getCountryName, getCountryFlag } from './geolocation'
 
 // Shared in-memory store for analytics events
 class AnalyticsStore {
@@ -644,108 +645,85 @@ class AnalyticsStore {
     }
   }
 
-  // Get enhanced geographic metrics from real events
+  // Get enhanced geographic metrics from real events with actual location data
   getEnhancedGeographicMetrics() {
     const now = Date.now()
     const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000)
     const oneMonthAgo = now - (30 * 24 * 60 * 60 * 1000)
     
-    // Get recent events with platform/geographic data
+    // Get recent events with location data
     const recentEvents = this.events.filter(event => 
       event.properties.timestamp && 
-      event.properties.timestamp > oneMonthAgo &&
-      event.properties.platform
+      event.properties.timestamp > oneMonthAgo
     )
 
-    // Group users by platform (as geographic proxy)
-    const platformUsers = new Map<string, Set<string>>()
-    const platformCountries = new Map<string, string>()
+    // Group users by actual country (from IP geolocation)
+    const countryUsers = new Map<string, Set<string>>()
     
-    // Map platforms to regions/countries for demo purposes
-    const platformToRegion: Record<string, string> = {
-      'darwin': 'United States',
-      'win32': 'United Kingdom', 
-      'linux': 'Germany',
-      'unknown': 'Canada'
-    }
-
     recentEvents.forEach(event => {
-      const platform = event.properties.platform || 'unknown'
+      const countryCode = event.properties.country_code || 'XX'
+      const countryName = event.properties.country_name || 'Unknown'
       const uniqueId = event.properties.hardware_id || event.properties.installation_id || event.properties.user_id
       
       if (uniqueId) {
-        if (!platformUsers.has(platform)) {
-          platformUsers.set(platform, new Set())
-          platformCountries.set(platform, platformToRegion[platform] || 'Other')
+        if (!countryUsers.has(countryCode)) {
+          countryUsers.set(countryCode, new Set())
         }
-        platformUsers.get(platform)!.add(uniqueId)
+        countryUsers.get(countryCode)!.add(uniqueId)
       }
     })
 
-    // Calculate metrics for each region/country
+    // Calculate metrics for each country (from real location data)
     const countriesData: Array<{
       country: string
+      country_code: string
       users: number
       percentage: number
       flag: string
       growth: number
       sessions: number
-      platform_source: string
+      location_source: string
     }> = []
 
-    // Country flags mapping
-    const countryFlags: Record<string, string> = {
-      'United States': '🇺🇸',
-      'United Kingdom': '🇬🇧',
-      'Germany': '🇩🇪',
-      'Canada': '🇨🇦',
-      'Australia': '🇦🇺',
-      'France': '🇫🇷',
-      'Japan': '🇯🇵',
-      'Netherlands': '🇳🇱',
-      'Other': '🌍'
-    }
+    // Use imported geolocation utilities
 
     // Get total unique users for percentage calculations
     const allUniqueUsers = new Set<string>()
-    platformUsers.forEach(users => {
+    countryUsers.forEach(users => {
       users.forEach(user => allUniqueUsers.add(user))
     })
     const totalUsers = allUniqueUsers.size
 
-    // Process each platform-based region
-    platformUsers.forEach((users, platform) => {
-      const country = platformCountries.get(platform) || 'Other'
+    // Process each country
+    countryUsers.forEach((users, countryCode) => {
+      const countryName = getCountryName(countryCode)
       const userCount = users.size
       const percentage = totalUsers > 0 ? (userCount / totalUsers) * 100 : 0
       
-      // Calculate sessions for this region (estimate based on events)
-      const platformEvents = recentEvents.filter(event => 
-        event.properties.platform === platform &&
+      // Calculate sessions for this country (estimate based on events)
+      const countryEvents = recentEvents.filter(event => 
+        event.properties.country_code === countryCode &&
         (event.event === 'zing_session_start' || event.event === 'zing_app_launch')
       )
-      const sessions = Math.max(userCount, Math.floor(platformEvents.length * 1.2))
+      const sessions = Math.max(userCount, Math.floor(countryEvents.length * 1.2))
 
-      // Use zero growth rates (no fallback data)
-      const growthRates: Record<string, number> = {
-        'darwin': 0,
-        'win32': 0,
-        'linux': 0,
-        'unknown': 0
-      }
+      // Get location source from events (to show data quality)
+      const sampleEvent = recentEvents.find(e => e.properties.country_code === countryCode)
+      const locationSource = sampleEvent?.properties.location_source || 'unknown'
       
       countriesData.push({
-        country,
+        country: countryName,
+        country_code: countryCode,
         users: userCount,
         percentage: Math.round(percentage * 10) / 10,
-        flag: countryFlags[country] || '🌍',
-        growth: growthRates[platform] || 0,
+        flag: getCountryFlag(countryCode),
+        growth: 0, // No growth calculation without historical data
         sessions,
-        platform_source: platform
+        location_source: locationSource
       })
     })
 
-    // Only use real platform-based geographic data - no fallback countries
+    // Only use real IP-based geographic data - no fallback countries
 
     // Sort by user count descending
     countriesData.sort((a, b) => b.users - a.users)
