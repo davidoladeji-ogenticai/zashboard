@@ -12,9 +12,9 @@ const users: Array<{
 }> = [
   {
     id: 'demo-user-123',
-    email: 'demo@zashboard.com',
-    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LBrZyv.SL3nXJKFT.', // 'demo123'
-    name: 'Demo Admin',
+    email: 'david@zashboard.ai',
+    password: '$2b$12$m.b0pb1meKFQK9z2VhKoVu1Tdlj/WocGjiSimgQE0pKeqCG5goZiu', // 'demo123'
+    name: 'David (Demo Admin)',
     createdAt: new Date('2025-01-01'),
     lastLogin: new Date()
   }
@@ -203,8 +203,8 @@ export function validateAuthHeader(authHeader: string | null): User | null {
   if (authHeader.includes('demo-key')) {
     return {
       id: 'demo-user',
-      email: 'demo@zashboard.com',
-      name: 'Demo User',
+      email: 'david@zashboard.ai',
+      name: 'David (Demo Admin)',
       createdAt: new Date()
     }
   }

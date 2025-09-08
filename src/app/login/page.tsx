@@ -175,7 +175,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => {
-                setEmail('demo@zashboard.com')
+                setEmail('david@zashboard.ai')
                 setPassword('demo123')
               }}
               className="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg font-medium transition-colors"
