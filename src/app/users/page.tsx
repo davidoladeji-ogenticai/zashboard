@@ -3,16 +3,45 @@
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
+import { useUserMetrics } from '@/hooks/useAnalytics'
 import {
   Users,
   UserPlus,
   UserCheck,
   Clock,
   TrendingUp,
-  Globe
+  Globe,
+  AlertCircle,
+  Loader2
 } from 'lucide-react'
 
 export default function UsersPage() {
+  const { data: userMetrics, isLoading, error } = useUserMetrics()
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Failed to Load User Data
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {error.message}
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
@@ -33,38 +62,56 @@ export default function UsersPage() {
 
           {/* User Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <MetricCard
-              title="Total Users"
-              value={45128}
-              change={12.3}
-              changeLabel="vs last month"
-              icon={Users}
-              trend="up"
-            />
-            <MetricCard
-              title="New Users"
-              value={2347}
-              change={8.7}
-              changeLabel="this week"
-              icon={UserPlus}
-              trend="up"
-            />
-            <MetricCard
-              title="Active Users"
-              value={12543}
-              change={-2.1}
-              changeLabel="vs last week"
-              icon={UserCheck}
-              trend="down"
-            />
-            <MetricCard
-              title="Avg Session Time"
-              value="24m 32s"
-              change={15.4}
-              changeLabel="vs last month"
-              icon={Clock}
-              trend="up"
-            />
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <div className="animate-pulse">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                      <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <MetricCard
+                  title="Total Users"
+                  value={userMetrics?.total_users ?? 0}
+                  change={userMetrics?.growth_metrics?.total_user_growth_percent ?? 0}
+                  changeLabel="vs last month"
+                  icon={Users}
+                  trend={userMetrics?.growth_metrics?.total_user_growth_percent > 0 ? "up" : "down"}
+                />
+                <MetricCard
+                  title="New Users"
+                  value={userMetrics?.new_users_this_week ?? 0}
+                  change={userMetrics?.growth_metrics?.new_user_growth_percent ?? 0}
+                  changeLabel="this week"
+                  icon={UserPlus}
+                  trend={userMetrics?.growth_metrics?.new_user_growth_percent > 0 ? "up" : "down"}
+                />
+                <MetricCard
+                  title="Active Users"
+                  value={userMetrics?.active_users_this_week ?? 0}
+                  change={userMetrics?.growth_metrics?.active_user_growth_percent ?? 0}
+                  changeLabel="vs last week"
+                  icon={UserCheck}
+                  trend={userMetrics?.growth_metrics?.active_user_growth_percent > 0 ? "up" : "down"}
+                />
+                <MetricCard
+                  title="Avg Session Time"
+                  value={userMetrics?.avg_session_duration_formatted ?? "0m 0s"}
+                  change={15.4}
+                  changeLabel="vs last month"
+                  icon={Clock}
+                  trend="up"
+                />
+              </>
+            )}
           </div>
 
           {/* User Engagement Charts */}
@@ -112,30 +159,36 @@ export default function UsersPage() {
                   </tr>
                 </thead>
                 <tbody className="text-gray-900 dark:text-gray-100">
-                  <tr className="border-b border-gray-100 dark:border-gray-800">
-                    <td className="py-3">usr_7a8b9c...</td>
-                    <td className="py-3">2 days ago</td>
-                    <td className="py-3">5 minutes ago</td>
-                    <td className="py-3">127</td>
-                    <td className="py-3">macOS</td>
-                    <td className="py-3">1.3.5</td>
-                  </tr>
-                  <tr className="border-b border-gray-100 dark:border-gray-800">
-                    <td className="py-3">usr_4e5f6g...</td>
-                    <td className="py-3">1 week ago</td>
-                    <td className="py-3">2 hours ago</td>
-                    <td className="py-3">83</td>
-                    <td className="py-3">Windows</td>
-                    <td className="py-3">1.3.4</td>
-                  </tr>
-                  <tr className="border-b border-gray-100 dark:border-gray-800">
-                    <td className="py-3">usr_1d2e3f...</td>
-                    <td className="py-3">3 days ago</td>
-                    <td className="py-3">1 hour ago</td>
-                    <td className="py-3">56</td>
-                    <td className="py-3">Linux</td>
-                    <td className="py-3">1.3.5</td>
-                  </tr>
+                  {isLoading ? (
+                    // Loading skeleton rows
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div></td>
+                        <td className="py-3"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div></td>
+                        <td className="py-3"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse"></div></td>
+                        <td className="py-3"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div></td>
+                        <td className="py-3"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div></td>
+                        <td className="py-3"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div></td>
+                      </tr>
+                    ))
+                  ) : userMetrics?.user_activity && userMetrics.user_activity.length > 0 ? (
+                    userMetrics.user_activity.map((user, index) => (
+                      <tr key={index} className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3">{user.user_id}</td>
+                        <td className="py-3">{user.first_seen_formatted}</td>
+                        <td className="py-3">{user.last_active_formatted}</td>
+                        <td className="py-3">{user.sessions}</td>
+                        <td className="py-3">{user.platform}</td>
+                        <td className="py-3">{user.version}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr className="border-b border-gray-100 dark:border-gray-800">
+                      <td colSpan={6} className="py-8 text-center text-gray-500 dark:text-gray-400">
+                        No user activity data available yet. Users will appear here once analytics events are received.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

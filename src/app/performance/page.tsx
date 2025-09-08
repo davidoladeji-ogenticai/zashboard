@@ -3,6 +3,7 @@
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
+import { usePerformanceMetrics } from '@/hooks/useAnalytics'
 import {
   Activity,
   Clock,
@@ -11,11 +12,40 @@ import {
   Zap,
   AlertCircle,
   CheckCircle,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react'
 
 export default function PerformancePage() {
-  const performanceMetrics = [
+  const { data: performanceData, isLoading, error } = usePerformanceMetrics()
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Failed to Load Performance Data
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {error.message}
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Use real data or fallback values
+  const performanceMetrics = performanceData?.performance_benchmarks || [
     { name: 'Startup Time', value: '2.3s', status: 'good', target: '< 3s' },
     { name: 'Memory Usage', value: '156MB', status: 'warning', target: '< 200MB' },
     { name: 'CPU Usage', value: '8.2%', status: 'good', target: '< 15%' },
@@ -68,38 +98,56 @@ export default function PerformancePage() {
 
           {/* Performance Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <MetricCard
-              title="Avg Startup Time"
-              value="2.3s"
-              change={-15.2}
-              changeLabel="improvement"
-              icon={Zap}
-              trend="up"
-            />
-            <MetricCard
-              title="Memory Usage"
-              value="156MB"
-              change={8.4}
-              changeLabel="vs last week"
-              icon={Cpu}
-              trend="down"
-            />
-            <MetricCard
-              title="Response Time"
-              value="127ms"
-              change={-22.1}
-              changeLabel="improvement"
-              icon={Activity}
-              trend="up"
-            />
-            <MetricCard
-              title="Crash Rate"
-              value="0.08%"
-              change={-45.6}
-              changeLabel="reduction"
-              icon={CheckCircle}
-              trend="up"
-            />
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <div className="animate-pulse">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                      <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <MetricCard
+                  title="Avg Startup Time"
+                  value={performanceData?.avg_startup_time_formatted ?? "2.3s"}
+                  change={performanceData?.metrics_summary?.startup_time_improvement ?? -15.2}
+                  changeLabel="improvement"
+                  icon={Zap}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Memory Usage"
+                  value={performanceData?.avg_memory_usage_formatted ?? "156MB"}
+                  change={performanceData?.metrics_summary?.memory_usage_change ?? 8.4}
+                  changeLabel="vs last week"
+                  icon={Cpu}
+                  trend="down"
+                />
+                <MetricCard
+                  title="Response Time"
+                  value={performanceData?.avg_response_time_formatted ?? "127ms"}
+                  change={performanceData?.metrics_summary?.response_time_improvement ?? -22.1}
+                  changeLabel="improvement"
+                  icon={Activity}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Crash Rate"
+                  value={performanceData?.crash_rate_formatted ?? "0.08%"}
+                  change={performanceData?.metrics_summary?.crash_rate_reduction ?? -45.6}
+                  changeLabel="reduction"
+                  icon={CheckCircle}
+                  trend="up"
+                />
+              </>
+            )}
           </div>
 
           {/* Performance Charts */}
@@ -148,36 +196,49 @@ export default function PerformancePage() {
                   </tr>
                 </thead>
                 <tbody className="text-gray-900 dark:text-gray-100">
-                  {performanceMetrics.map((metric, index) => (
-                    <tr key={index} className="border-b border-gray-100 dark:border-gray-800">
-                      <td className="py-4">
-                        <span className="font-medium">{metric.name}</span>
-                      </td>
-                      <td className="py-4">
-                        <span className="font-mono text-lg">{metric.value}</span>
-                      </td>
-                      <td className="py-4">
-                        <span className="text-gray-500 dark:text-gray-400">{metric.target}</span>
-                      </td>
-                      <td className="py-4">
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(metric.status)}
-                          <span className={`font-medium capitalize ${getStatusColor(metric.status)}`}>
-                            {metric.status}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4">
-                        <div className="flex items-center">
-                          {metric.status === 'excellent' || metric.status === 'good' ? (
-                            <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                          ) : (
-                            <TrendingUp className="h-4 w-4 text-yellow-600 dark:text-yellow-400 transform rotate-180" />
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {isLoading ? (
+                    // Loading skeleton rows
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <tr key={i} className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse"></div></td>
+                        <td className="py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div></td>
+                        <td className="py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div></td>
+                        <td className="py-4"><div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div></td>
+                        <td className="py-4"><div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div></td>
+                      </tr>
+                    ))
+                  ) : (
+                    performanceMetrics.map((metric, index) => (
+                      <tr key={index} className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-4">
+                          <span className="font-medium">{metric.name}</span>
+                        </td>
+                        <td className="py-4">
+                          <span className="font-mono text-lg">{metric.value}</span>
+                        </td>
+                        <td className="py-4">
+                          <span className="text-gray-500 dark:text-gray-400">{metric.target}</span>
+                        </td>
+                        <td className="py-4">
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(metric.status)}
+                            <span className={`font-medium capitalize ${getStatusColor(metric.status)}`}>
+                              {metric.status}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4">
+                          <div className="flex items-center">
+                            {metric.status === 'excellent' || metric.status === 'good' ? (
+                              <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <TrendingUp className="h-4 w-4 text-yellow-600 dark:text-yellow-400 transform rotate-180" />
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

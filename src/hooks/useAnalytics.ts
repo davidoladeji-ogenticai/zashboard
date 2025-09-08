@@ -148,3 +148,47 @@ export function useRecentEvents() {
     refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
   })
 }
+
+// User metrics hook
+export function useUserMetrics() {
+  return useQuery({
+    queryKey: ['dashboard', 'metrics', 'users'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/dashboard/metrics/users`, {
+        headers: apiHeaders
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user metrics: ${response.status} ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      return data.data // Return the actual metrics data
+    },
+    refetchInterval: 60000, // Refetch every minute
+    retry: 2,
+    staleTime: 30000, // Consider data stale after 30 seconds
+  })
+}
+
+// Performance metrics hook
+export function usePerformanceMetrics() {
+  return useQuery({
+    queryKey: ['dashboard', 'metrics', 'performance'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/dashboard/metrics/performance`, {
+        headers: apiHeaders
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch performance metrics: ${response.status} ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      return data.data // Return the actual metrics data
+    },
+    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes 
+    retry: 2,
+    staleTime: 90000, // Consider data stale after 90 seconds
+  })
+}

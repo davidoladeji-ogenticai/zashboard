@@ -3,7 +3,7 @@
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
-import { useRealtimeMetrics, useAnalyticsHealth } from '@/hooks/useAnalytics'
+import { useRealtimeMetrics, useAnalyticsHealth, useVersionMetrics, useUserMetrics } from '@/hooks/useAnalytics'
 import {
   Users,
   Activity,
@@ -19,6 +19,8 @@ import {
 export default function Home() {
   const { data: realtimeData, isLoading: isLoadingRealtime, error: realtimeError } = useRealtimeMetrics()
   const { data: healthData, isLoading: isLoadingHealth } = useAnalyticsHealth()
+  const { data: versionData } = useVersionMetrics()
+  const { data: userData } = useUserMetrics()
 
   if (realtimeError) {
     return (
@@ -118,38 +120,56 @@ export default function Home() {
 
           {/* Additional Metrics Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <MetricCard
-              title="Downloads"
-              value={2156}
-              change={15.3}
-              changeLabel="this week"
-              icon={Download}
-              trend="up"
-            />
-            <MetricCard
-              title="Avg Session"
-              value="24m"
-              change={-5.2}
-              changeLabel="vs last week"
-              icon={Clock}
-              trend="down"
-            />
-            <MetricCard
-              title="Update Success"
-              value="96.8%"
-              change={2.1}
-              changeLabel="success rate"
-              icon={CheckCircle}
-              trend="up"
-            />
-            <MetricCard
-              title="Error Rate"
-              value="0.12%"
-              change={-18.5}
-              changeLabel="vs last month"
-              icon={AlertCircle}
-              trend="up"
-            />
+            {isLoadingRealtime ? (
+              // Loading skeleton for additional metrics
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <div className="animate-pulse">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                      <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <MetricCard
+                  title="Total Users"
+                  value={userData?.total_users ?? 0}
+                  change={userData?.growth_metrics?.total_user_growth_percent ?? 0}
+                  changeLabel="vs last month"
+                  icon={Download}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Avg Session"
+                  value={userData?.avg_session_duration_formatted ?? "0m 0s"}
+                  change={userData?.growth_metrics?.active_user_growth_percent ?? 0}
+                  changeLabel="vs last week"
+                  icon={Clock}
+                  trend={userData?.growth_metrics?.active_user_growth_percent > 0 ? "up" : "down"}
+                />
+                <MetricCard
+                  title="Update Success"
+                  value={`${versionData?.update_success_rate ?? 96.8}%`}
+                  change={2.1}
+                  changeLabel="success rate"
+                  icon={CheckCircle}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Active Users"
+                  value={userData?.active_users_this_week ?? 0}
+                  change={userData?.growth_metrics?.active_user_growth_percent ?? 0}
+                  changeLabel="this week"
+                  icon={AlertCircle}
+                  trend={userData?.growth_metrics?.active_user_growth_percent > 0 ? "up" : "down"}
+                />
+              </>
+            )}
           </div>
 
           {/* Charts and Additional Content */}
