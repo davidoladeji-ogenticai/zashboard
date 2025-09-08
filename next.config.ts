@@ -1,7 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Explicitly set port 3000 and prevent fallback to other ports
+  port: 3000,
+  
+  // Development server configuration
+  devIndicators: {
+    buildActivity: true,
+  },
+  
+  // Prevent Next.js from automatically selecting alternative ports
+  experimental: {
+    // Force port 3000 - don't allow fallbacks
+    strictPort: true,
+  },
+  
+  // Environment variables that ensure port consistency
+  env: {
+    NEXT_PUBLIC_APP_PORT: '3000',
+    PORT: '3000',
+  },
 };
 
 export default nextConfig;

@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "bash start-dev.sh",
+    "dev:direct": "next dev --turbopack --port 3000",
+    "dev:force": "bash start-dev.sh --force",
+    "dev:check": "lsof -ti:3000 && echo 'Port 3000 is in use' || echo 'Port 3000 is available'",
+    "port:kill": "lsof -ti:3000 | xargs kill -9 2>/dev/null || echo 'No processes found on port 3000'",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "next start --port 3000",
     "lint": "eslint",
     "db:init": "node scripts/init-db.js",
     "db:test": "node scripts/init-db.js --test"

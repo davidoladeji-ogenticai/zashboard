@@ -745,31 +745,7 @@ class AnalyticsStore {
       })
     })
 
-    // Add some additional countries for demo if we have limited data
-    const existingCountries = new Set(countriesData.map(c => c.country))
-    const additionalCountries = [
-      { country: 'Australia', flag: '🇦🇺', baseUsers: 45 },
-      { country: 'France', flag: '🇫🇷', baseUsers: 32 },
-      { country: 'Japan', flag: '🇯🇵', baseUsers: 28 },
-      { country: 'Netherlands', flag: '🇳🇱', baseUsers: 21 }
-    ]
-
-    additionalCountries.forEach(({ country, flag, baseUsers }) => {
-      if (!existingCountries.has(country) && countriesData.length < 8) {
-        const users = Math.max(1, Math.floor(totalUsers * 0.05) + baseUsers)
-        const percentage = totalUsers > 0 ? (users / (totalUsers + users)) * 100 : 0
-        
-        countriesData.push({
-          country,
-          users,
-          percentage: Math.round(percentage * 10) / 10,
-          flag,
-          growth: 0,
-          sessions: Math.floor(users * 1.3),
-          platform_source: 'estimated'
-        })
-      }
-    })
+    // Only use real platform-based geographic data - no fallback countries
 
     // Sort by user count descending
     countriesData.sort((a, b) => b.users - a.users)
