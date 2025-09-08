@@ -30,12 +30,14 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (data.success) {
-        // Store token in localStorage
-        localStorage.setItem('auth_token', data.token)
+        // Token is now stored in HTTP-only cookie automatically
+        // Store user data in localStorage for client-side access
         localStorage.setItem('user', JSON.stringify(data.user))
         
-        // Redirect to dashboard
-        router.push('/')
+        // Get redirect URL from query params, default to dashboard
+        const urlParams = new URLSearchParams(window.location.search)
+        const redirectUrl = urlParams.get('redirect') || '/'
+        router.push(redirectUrl)
       } else {
         setError(data.error || 'Login failed')
       }

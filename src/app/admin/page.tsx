@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
@@ -18,7 +16,7 @@ import {
   Loader2
 } from 'lucide-react'
 
-export default function Home() {
+export default function AdminDashboard() {
   const { data: realtimeData, isLoading: isLoadingRealtime, error: realtimeError } = useRealtimeMetrics()
   const { data: healthData, isLoading: isLoadingHealth } = useAnalyticsHealth()
   const { data: versionData } = useVersionMetrics()

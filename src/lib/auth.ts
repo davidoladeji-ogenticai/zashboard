@@ -9,9 +9,18 @@ const users: Array<{
   name: string
   createdAt: Date
   lastLogin?: Date
-}> = []
+}> = [
+  {
+    id: 'demo-user-123',
+    email: 'demo@zashboard.com',
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LBrZyv.SL3nXJKFT.', // 'demo123'
+    name: 'Demo Admin',
+    createdAt: new Date('2025-01-01'),
+    lastLogin: new Date()
+  }
+]
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-nextauth-secret-here'
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'
 
 export interface User {

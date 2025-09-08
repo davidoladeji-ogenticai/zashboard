@@ -30,14 +30,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Return success response with token and user data
-    return NextResponse.json({
+    // Set HTTP-only cookie for security
+    const response = NextResponse.json({
       success: true,
       message: 'Login successful',
       token: result.token,
       user: result.user,
       timestamp: new Date().toISOString()
     })
+
+    // Set secure cookie
+    response.cookies.set('auth_token', result.token!, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 // 7 days
+    })
+
+    return response
 
   } catch (error) {
     console.error('Login API error:', error)
