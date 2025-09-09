@@ -13,7 +13,7 @@ const apiKeys: Array<{
 }> = [
   {
     id: 'demo-key-1',
-    key: 'demo-key-xxxxxxxxx',
+    key: 'demo-key',
     name: 'Demo Analytics Key',
     createdAt: new Date('2025-01-01'),
     lastUsed: new Date(),
@@ -35,11 +35,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Return API keys without exposing the full key values
+    // Return API keys - show demo keys in full, mask real keys for security
     const sanitizedKeys = apiKeys.map(key => ({
       id: key.id,
       name: key.name,
-      key: key.key.substring(0, 8) + '...' + key.key.slice(-4),
+      key: key.id === 'demo-key-1' || key.key.startsWith('demo-key') ? 
+        key.key : 
+        key.key.substring(0, 8) + '...' + key.key.slice(-4),
       createdAt: key.createdAt,
       lastUsed: key.lastUsed,
       isActive: key.isActive
