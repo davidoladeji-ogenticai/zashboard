@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { EventPayload } from '@/types/analytics'
 import { analyticsStore } from '@/lib/analytics-store'
+import { validateApiKey } from '@/lib/database/api-keys'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
+    // Verify authentication against database
     const authHeader = request.headers.get('authorization')
-    const expectedToken = process.env.ZING_ANALYTICS_KEY || 'demo-key'
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
-    if (token !== expectedToken) {
+    
+    // Validate API key against database
+    const apiKeyInfo = await validateApiKey(token)
+    if (!apiKeyInfo) {
       return NextResponse.json(
         { error: 'Unauthorized', code: 'AUTH_ERROR' },
         { status: 401 }
@@ -92,9 +95,19 @@ export async function POST(request: NextRequest) {
 // GET endpoint for testing/debugging (admin only)
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
-  const expectedToken = process.env.ZING_ANALYTICS_KEY || 'demo-key'
   
-  if (!authHeader || authHeader.replace('Bearer ', '') !== expectedToken) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return NextResponse.json(
+      { error: 'Unauthorized', code: 'AUTH_ERROR' },
+      { status: 401 }
+    )
+  }
+
+  const token = authHeader.replace('Bearer ', '')
+  
+  // Validate API key against database
+  const apiKeyInfo = await validateApiKey(token)
+  if (!apiKeyInfo) {
     return NextResponse.json(
       { error: 'Unauthorized', code: 'AUTH_ERROR' },
       { status: 401 }

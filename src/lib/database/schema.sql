@@ -44,6 +44,16 @@ CREATE TABLE user_sessions (
     user_agent TEXT
 );
 
+-- API keys table for authentication management
+CREATE TABLE api_keys (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    key_value VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_used TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
 -- System metrics table for health monitoring
 CREATE TABLE system_metrics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -71,6 +81,10 @@ CREATE INDEX idx_users_last_login ON users(last_login);
 CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX idx_user_sessions_session_token ON user_sessions(session_token);
 CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
+
+CREATE INDEX idx_api_keys_key_value ON api_keys(key_value);
+CREATE INDEX idx_api_keys_created_at ON api_keys(created_at);
+CREATE INDEX idx_api_keys_is_active ON api_keys(is_active);
 
 CREATE INDEX idx_system_metrics_metric_name ON system_metrics(metric_name);
 CREATE INDEX idx_system_metrics_timestamp ON system_metrics(timestamp);
@@ -162,6 +176,11 @@ WHERE platform IS NOT NULL
 GROUP BY platform
 ORDER BY unique_users DESC;
 
+-- Insert initial API keys
+INSERT INTO api_keys (key_value, name, created_at, is_active) VALUES
+('demo-key', 'Demo Analytics Key', NOW(), true),
+('zash_x7bheq3bmr', 'Production Analytics Key', NOW(), true);
+
 -- Insert initial system health data
 INSERT INTO system_metrics (metric_name, metric_value, metric_text) VALUES
 ('database_schema_version', 1.0, 'Initial schema version'),
@@ -170,6 +189,7 @@ INSERT INTO system_metrics (metric_name, metric_value, metric_text) VALUES
 COMMENT ON TABLE users IS 'User accounts for dashboard authentication';
 COMMENT ON TABLE analytics_events IS 'All analytics events from Zing browser applications';
 COMMENT ON TABLE user_sessions IS 'Active user sessions for authentication tracking';  
+COMMENT ON TABLE api_keys IS 'API keys for analytics endpoint authentication';
 COMMENT ON TABLE system_metrics IS 'System health and performance metrics';
 COMMENT ON VIEW user_analytics_summary IS 'Daily user analytics aggregated data';
 COMMENT ON VIEW version_analytics_summary IS 'Version adoption and usage analytics';

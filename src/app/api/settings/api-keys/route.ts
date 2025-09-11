@@ -1,25 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAuthHeader } from '@/lib/auth'
 import { generateToken } from '@/lib/auth'
-
-// In-memory API key storage (should be replaced with database)
-const apiKeys: Array<{
-  id: string
-  key: string
-  name: string
-  createdAt: Date
-  lastUsed?: Date
-  isActive: boolean
-}> = [
-  {
-    id: 'demo-key-1',
-    key: 'demo-key',
-    name: 'Demo Analytics Key',
-    createdAt: new Date('2025-01-01'),
-    lastUsed: new Date(),
-    isActive: true
-  }
-]
+import { 
+  getApiKeys, 
+  createApiKey, 
+  deleteApiKey, 
+  regenerateApiKey 
+} from '@/lib/database/api-keys'
 
 // GET - List all API keys
 export async function GET(request: NextRequest) {
@@ -35,11 +22,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Get API keys from database
+    const keys = await getApiKeys()
+
     // Return API keys - show demo keys in full, mask real keys for security
-    const sanitizedKeys = apiKeys.map(key => ({
+    const sanitizedKeys = keys.map(key => ({
       id: key.id,
       name: key.name,
-      key: key.id === 'demo-key-1' || key.key.startsWith('demo-key') ? 
+      key: key.key.startsWith('demo-key') || key.key === 'demo-key' ? 
         key.key : 
         key.key.substring(0, 8) + '...' + key.key.slice(-4),
       createdAt: key.createdAt,
@@ -90,16 +80,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate new API key
-    const newKey = {
-      id: `key_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      key: `zash_${Math.random().toString(36).substr(2, 32)}`,
-      name: name.trim(),
-      createdAt: new Date(),
-      isActive: true
-    }
-
-    apiKeys.push(newKey)
+    // Generate new API key value
+    const keyValue = `zash_${Math.random().toString(36).substr(2, 32)}`
+    
+    // Create API key in database
+    const newKey = await createApiKey({
+      key_value: keyValue,
+      name: name.trim()
+    })
 
     return NextResponse.json({
       success: true,
@@ -151,8 +139,11 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const keyIndex = apiKeys.findIndex(key => key.id === keyId)
-    if (keyIndex === -1) {
+    // Check if key exists and get its details
+    const keys = await getApiKeys()
+    const keyToDelete = keys.find(key => key.id === keyId)
+    
+    if (!keyToDelete) {
       return NextResponse.json(
         { error: 'API key not found' },
         { status: 404 }
@@ -160,14 +151,22 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Don't allow deletion of demo key
-    if (apiKeys[keyIndex].id === 'demo-key-1') {
+    if (keyToDelete.key === 'demo-key') {
       return NextResponse.json(
         { error: 'Cannot delete demo API key' },
         { status: 403 }
       )
     }
 
-    apiKeys.splice(keyIndex, 1)
+    // Delete from database
+    const deleted = await deleteApiKey(keyId)
+    
+    if (!deleted) {
+      return NextResponse.json(
+        { error: 'Failed to delete API key' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
