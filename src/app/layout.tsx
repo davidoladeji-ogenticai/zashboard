@@ -19,7 +19,12 @@ export const metadata: Metadata = {
   title: "Zashboard - Zing Analytics",
   description: "Admin dashboard for Zing browser analytics and metrics",
   icons: {
-    icon: "/ogenticai.png",
+    icon: [
+      { url: "/ogenticai.png" },
+      { url: "/ogenticai.png", sizes: "32x32", type: "image/png" },
+      { url: "/ogenticai.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/ogenticai.png",
   },
 };
 
