@@ -1,322 +1,327 @@
 'use client'
 
 import Link from 'next/link'
-import { 
-  BarChart3, 
-  Globe, 
-  Users, 
-  Zap, 
-  Shield, 
-  TrendingUp,
-  ChevronRight,
-  Check
-} from 'lucide-react'
+import Image from 'next/image'
+import localFont from 'next/font/local'
+import { useState, useEffect } from 'react'
+
+const satoshi = localFont({
+  src: [
+    {
+      path: '../../fonts/Satoshi-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../fonts/Satoshi-Medium.woff2',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: '../../fonts/Satoshi-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-satoshi',
+  fallback: ['system-ui', 'sans-serif'],
+})
+
+const carouselSlides = [
+  {
+    text: "Zing is a multi-modal AI business browser that can interact with users in all the ways a human assistant would. It's like giving your browser human-like senses and abilities:"
+  },
+  {
+    text: "Experience seamless integration with your favorite tools and workflows. Zing adapts to your work style and learns from your preferences."
+  },
+  {
+    text: "Boost productivity with AI-powered insights that turn your daily tasks into actionable intelligence."
+  }
+]
 
 export default function LandingPage() {
-  const features = [
-    {
-      icon: BarChart3,
-      title: 'Real-time Analytics',
-      description: 'Monitor user behavior, performance metrics, and system health in real-time with comprehensive dashboards.'
-    },
-    {
-      icon: Globe,
-      title: 'Global Insights',
-      description: 'Track usage patterns across different regions and platforms with detailed geographic analytics.'
-    },
-    {
-      icon: Users,
-      title: 'User Journey Tracking',
-      description: 'Understand how users interact with your application from onboarding to advanced features.'
-    },
-    {
-      icon: Zap,
-      title: 'Performance Monitoring',
-      description: 'Track startup times, memory usage, response times, and crash rates to optimize user experience.'
-    },
-    {
-      icon: Shield,
-      title: 'Privacy First',
-      description: 'Built with privacy in mind. All analytics respect user privacy with hardware-based identification.'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Growth Analytics',
-      description: 'Monitor user acquisition, retention rates, and version adoption to drive product decisions.'
-    }
-  ]
+  const [currentSlide, setCurrentSlide] = useState(0)
 
-  const pricingPlans = [
-    {
-      name: 'Starter',
-      price: 'Free',
-      description: 'Perfect for small projects and getting started',
-      features: [
-        '10k events per month',
-        'Basic analytics dashboard',
-        'Real-time monitoring',
-        'Email support'
-      ]
-    },
-    {
-      name: 'Pro',
-      price: '$29/mo',
-      description: 'For growing applications with advanced needs',
-      features: [
-        '100k events per month',
-        'Advanced analytics',
-        'Custom dashboards',
-        'API access',
-        'Priority support'
-      ],
-      popular: true
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      description: 'For large-scale applications with enterprise requirements',
-      features: [
-        'Unlimited events',
-        'White-label solution',
-        'Custom integrations',
-        'SLA guarantee',
-        'Dedicated support'
-      ]
-    }
-  ]
+  // Auto-play carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)
+    }, 5000) // Change slide every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Navigation */}
-      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Zashboard</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/login"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Login
-              </Link>
-              <Link 
-                href="/register"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
+    <div className={`${satoshi.variable} font-[family-name:var(--font-satoshi)] bg-[#0f0f0f] relative min-h-screen w-full overflow-x-hidden`}>
+      {/* Logo and Navigation */}
+      <div className="absolute flex gap-1 items-center left-8 top-8">
+        <div className="relative shrink-0 w-10 h-10">
+          <Image
+            alt="Zashboard Logo"
+            className="object-cover"
+            src="/e654095c7dad785b3b2e942849e6f312ea372bb3.png"
+            fill
+          />
         </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            Analytics Made
-            <span className="text-blue-600 dark:text-blue-400"> Simple</span>
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Get deep insights into your application's performance, user behavior, and growth metrics 
-            with our comprehensive analytics platform designed for modern applications.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/register"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center"
-            >
-              Start Free Trial
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
-            <Link 
-              href="/demo"
-              className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-8 py-3 rounded-lg font-semibold transition-colors"
-            >
-              View Demo
-            </Link>
-          </div>
+        <div className="flex flex-col font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#832ad6] text-[32px] text-center whitespace-nowrap tracking-[-2px]">
+          <p className="leading-normal">Zashboard</p>
         </div>
-      </section>
+      </div>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Everything You Need to Understand Your Users
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              From basic metrics to advanced analytics, Zashboard provides all the tools 
-              you need to make data-driven decisions.
-            </p>
+      {/* Sign in / Sign up buttons */}
+      <div className="absolute flex gap-4 items-center right-8 top-8">
+        <Link href="/sign-in">
+          <div className="bg-[#202123] flex gap-2 h-10 items-center justify-center px-[34px] py-2 rounded-lg cursor-pointer hover:bg-white transition-all duration-200 group">
+            <div className="flex flex-col font-medium justify-center leading-[0] not-italic text-xs whitespace-nowrap text-white group-hover:text-black">
+              <p className="leading-normal">Sign in</p>
+            </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                <feature.icon className="h-12 w-12 text-blue-600 dark:text-blue-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {feature.description}
-                </p>
+        </Link>
+        <Link href="/sign-up">
+          <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] h-10 rounded-lg w-[154px] cursor-pointer hover:bg-gradient-to-r hover:from-[#832ad6] hover:to-[#9333ea] hover:border-transparent transition-all duration-200">
+            <div className="h-10 overflow-clip relative rounded-[inherit] w-[154px] flex items-center justify-center">
+              <div className="flex flex-col font-medium justify-center leading-[0] not-italic text-xs whitespace-nowrap text-white">
+                <p className="leading-normal">Sign up</p>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </Link>
+      </div>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-blue-600 dark:bg-blue-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">10M+</div>
-              <div className="text-blue-100">Events Tracked</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">500+</div>
-              <div className="text-blue-100">Applications</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">99.9%</div>
-              <div className="text-blue-100">Uptime</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">50+</div>
-              <div className="text-blue-100">Countries</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Main Content - Centered */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[786px] flex flex-col gap-8 items-center">
 
-      {/* Pricing Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Choose the plan that fits your needs. Upgrade or downgrade at any time.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {pricingPlans.map((plan, index) => (
-              <div 
-                key={index} 
-                className={`bg-white dark:bg-gray-800 rounded-xl p-8 border-2 transition-all hover:shadow-lg ${
-                  plan.popular 
-                    ? 'border-blue-600 dark:border-blue-400 ring-2 ring-blue-600 ring-opacity-50' 
-                    : 'border-gray-200 dark:border-gray-700'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full inline-block mb-4">
-                    Most Popular
-                  </div>
-                )}
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{plan.price}</div>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">{plan.description}</p>
-                
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-3" />
-                      <span className="text-gray-600 dark:text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Link 
-                  href="/register"
-                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors text-center block ${
-                    plan.popular
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  {plan.price === 'Custom' ? 'Contact Sales' : 'Get Started'}
-                </Link>
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 items-center relative shrink-0 w-[455px]">
+          {/* Badge */}
+          <div className="border border-[#e5aa57] border-solid h-8 relative rounded-[20px] shrink-0 w-[323px]">
+            <div className="h-8 overflow-clip relative rounded-[inherit] w-[323px]">
+              <div className="absolute flex flex-col font-medium justify-center leading-[0] left-1/2 not-italic text-sm text-center whitespace-nowrap text-white top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <p className="leading-normal">Welcome to the future of browsing</p>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-white dark:bg-gray-800">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Join thousands of developers who trust Zashboard for their analytics needs.
-          </p>
-          <Link 
-            href="/register"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
-          >
-            Start Your Free Trial
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-black text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <BarChart3 className="h-8 w-8 text-blue-400" />
-                <span className="text-xl font-bold">Zashboard</span>
-              </div>
-              <p className="text-gray-400">
-                Modern analytics platform for understanding your users and optimizing your application.
+          {/* Main Headline */}
+          <div className="flex flex-col gap-2 items-center leading-[0] not-italic relative shrink-0 text-center w-full">
+            <div className="flex flex-col font-bold justify-center relative shrink-0 text-[32px] text-white tracking-[-2px] w-full">
+              <p className="leading-normal">
+                <span>Don&apos;t just browse. </span>
+                <span className="bg-clip-text bg-gradient-to-r from-[#e5aa57] from-[46.154%] to-[#da5965]" style={{ WebkitTextFillColor: 'transparent' }}>
+                  Experience.
+                </span>
               </p>
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/demo" className="hover:text-white transition-colors">Demo</Link></li>
-              </ul>
+            <div className="flex flex-col font-medium justify-center leading-normal relative shrink-0 text-[#8e8e8e] text-base w-full">
+              <p className="mb-0">Your Zashboard becomes smarter with every tool you connect. </p>
+              <p>Start with any card below and watch the magic unfold.</p>
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
-                <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Zashboard. All rights reserved.</p>
           </div>
         </div>
-      </footer>
+
+        {/* Feature Cards Section */}
+        <div className="flex flex-col gap-6 items-start relative shrink-0 w-full">
+
+          {/* Zing Hero Card */}
+          <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[136px] relative rounded-xl shrink-0 w-full">
+            <div className="h-[136px] overflow-clip relative rounded-[inherit] w-full">
+              {/* Left Text - Dynamic Carousel Content */}
+              <div className="absolute flex flex-col font-medium justify-center leading-[0] left-[32px] not-italic text-sm text-white top-1/2 -translate-y-1/2 w-[385px]">
+                <p className="leading-normal transition-opacity duration-300">
+                  {carouselSlides[currentSlide].text}
+                </p>
+              </div>
+
+              {/* Right Zing Logo */}
+              <div className="absolute h-[94px] right-[32px] top-1/2 -translate-y-1/2 w-[287px]">
+                {/* Rectangle border frame */}
+                <div className="absolute inset-0">
+                  <Image
+                    alt="Zing frame"
+                    src="/rect-1.png"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                {/* Zing logo centered */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[50px]">
+                  <Image
+                    alt="Zing logo"
+                    src="/zing.png"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* Carousel Dots - Interactive */}
+              <div className="absolute flex gap-2 left-1/2 top-[118px] -translate-x-1/2">
+                {carouselSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-[#e5aa57] w-3'
+                        : 'bg-gray-600 hover:bg-gray-500'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Feature Cards Grid */}
+          <div className="flex flex-wrap gap-6 items-start relative shrink-0 w-full">
+
+            {/* Learn Zing Card */}
+            <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[195px] relative rounded-xl shrink-0 w-[246px] hover:border-[rgba(43,48,59,0.8)] transition-colors">
+              <div className="h-[195px] overflow-clip relative rounded-[inherit] w-[246px]">
+                <div className="absolute flex flex-col font-bold justify-center leading-[0] left-6 not-italic text-sm whitespace-nowrap text-white top-[52px]">
+                  <p className="leading-normal">Learn Zing</p>
+                </div>
+                <div className="absolute bg-[rgba(15,15,15,0.2)] left-6 rounded-[80px] w-8 h-8 top-[16px]">
+                  <div className="absolute left-1/2 w-5 h-5 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Image alt="" src="/e654095c7dad785b3b2e942849e6f312ea372bb3.png" fill className="object-cover" />
+                  </div>
+                </div>
+                <div className="absolute flex flex-col font-normal justify-center leading-[0] left-6 not-italic text-xs text-[rgba(255,255,255,0.5)] top-[83px] w-[198px]">
+                  <p className="leading-normal">Discover what&apos;s possible with an AI-native browser.</p>
+                </div>
+                <div className="absolute bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-8 left-6 rounded-xl top-[147px] w-[198px] cursor-pointer hover:bg-[rgba(32,33,35,0.5)] transition-colors">
+                  <div className="h-8 overflow-clip relative rounded-[inherit] w-[198px] flex items-center justify-center">
+                    <div className="flex flex-col font-bold justify-center leading-[0] not-italic text-xs text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">
+                      <p className="leading-normal">Start Zinging</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Boost Productivity Card */}
+            <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[195px] relative rounded-xl shrink-0 w-[246px] hover:border-[rgba(43,48,59,0.8)] transition-colors">
+              <div className="h-[195px] overflow-clip relative rounded-[inherit] w-[246px]">
+                <div className="absolute bg-[rgba(15,15,15,0.2)] left-6 rounded-[80px] w-8 h-8 top-[16px]">
+                  <div className="absolute left-1/2 w-5 h-5 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Image alt="" src="/ad87474e243bedc81361e9ccae7dfe0793c4dbd4.svg" fill />
+                  </div>
+                </div>
+                <div className="absolute flex flex-col font-bold justify-center leading-[0] left-6 not-italic text-sm whitespace-nowrap text-white top-[54px]">
+                  <p className="leading-normal">Boost Productivity</p>
+                </div>
+                <div className="absolute flex flex-col font-normal justify-center leading-[0] left-6 not-italic text-xs text-[rgba(255,255,255,0.5)] top-[85px] w-[198px]">
+                  <p className="leading-normal">Preview your daily briefing and see how Zing turns insights into action.</p>
+                </div>
+                <div className="absolute bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-8 left-6 rounded-xl top-[147px] w-[198px] cursor-pointer hover:bg-[rgba(32,33,35,0.5)] transition-colors">
+                  <div className="h-8 overflow-clip relative rounded-[inherit] w-[198px] flex items-center justify-center">
+                    <div className="flex flex-col font-bold justify-center leading-[0] not-italic text-xs text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">
+                      <p className="leading-normal">Try the demo</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Try Voice Command Card */}
+            <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[195px] relative rounded-xl shrink-0 w-[246px] hover:border-[rgba(43,48,59,0.8)] transition-colors">
+              <div className="h-[195px] overflow-clip relative rounded-[inherit] w-[246px]">
+                <div className="absolute bg-[rgba(15,15,15,0.2)] left-6 rounded-[80px] w-8 h-8 top-[16px]">
+                  <div className="absolute left-1/2 w-5 h-5 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Image alt="" src="/724b53dd35db6ad751884f575c4d728afcaba016.svg" fill />
+                  </div>
+                </div>
+                <div className="absolute flex flex-col font-bold justify-center leading-[0] left-6 not-italic text-sm whitespace-nowrap text-white top-[54px]">
+                  <p className="leading-normal">Try voice command</p>
+                </div>
+                <div className="absolute flex flex-col font-normal justify-center leading-[0] left-6 not-italic text-xs text-[rgba(255,255,255,0.5)] top-[85px] w-[198px]">
+                  <p className="leading-normal">Speak to Zing instead of typing. Test how voice controls your workflow.</p>
+                </div>
+                <div className="absolute bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-8 left-6 rounded-xl top-[147px] w-[198px] cursor-pointer hover:bg-[rgba(32,33,35,0.5)] transition-colors">
+                  <div className="h-8 overflow-clip relative rounded-[inherit] w-[198px] flex items-center justify-center">
+                    <div className="flex flex-col font-bold justify-center leading-[0] not-italic text-xs text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">
+                      <p className="leading-normal">Enable voice</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Connect Your Tools Card */}
+            <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[195px] relative rounded-xl shrink-0 w-[246px] hover:border-[rgba(43,48,59,0.8)] transition-colors">
+              <div className="h-[195px] overflow-clip relative rounded-[inherit] w-[246px]">
+                <div className="absolute bg-[rgba(15,15,15,0.2)] left-6 rounded-[80px] w-8 h-8 top-[16px]">
+                  <div className="absolute left-1/2 w-4 h-4 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Image alt="" src="/424706748edce30dcc774aaf04a077fa21ed60a8.svg" fill />
+                  </div>
+                </div>
+                <div className="absolute flex flex-col font-bold justify-center leading-[0] left-6 not-italic text-sm whitespace-nowrap text-white top-[54px]">
+                  <p className="leading-normal">Connect your tools</p>
+                </div>
+                <div className="absolute flex flex-col font-normal justify-center leading-[0] left-6 not-italic text-xs text-[rgba(255,255,255,0.5)] top-[85px] w-[198px]">
+                  <p className="leading-normal">Bring your apps into Zing for smarter, more personalized insights.</p>
+                </div>
+                <div className="absolute bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-8 left-6 rounded-xl top-[147px] w-[198px] cursor-pointer hover:bg-[rgba(32,33,35,0.5)] transition-colors">
+                  <div className="h-8 overflow-clip relative rounded-[inherit] w-[198px] flex items-center justify-center">
+                    <div className="flex flex-col font-bold justify-center leading-[0] not-italic text-xs text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">
+                      <p className="leading-normal">Connect tools</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips & Tricks Card */}
+            <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[195px] relative rounded-xl shrink-0 w-[246px] hover:border-[rgba(43,48,59,0.8)] transition-colors">
+              <div className="h-[195px] overflow-clip relative rounded-[inherit] w-[246px]">
+                <div className="absolute bg-[rgba(15,15,15,0.2)] left-6 rounded-[80px] w-8 h-8 top-[16px]">
+                  <div className="absolute h-5 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4">
+                    <Image alt="" src="/e7fc0621118ebb6885b9c446539d6adbf8ec06be.svg" fill />
+                  </div>
+                </div>
+                <div className="absolute flex flex-col font-bold justify-center leading-[0] left-6 not-italic text-sm whitespace-nowrap text-white top-[54px]">
+                  <p className="leading-normal">Tips &amp; Tricks</p>
+                </div>
+                <div className="absolute flex flex-col font-medium justify-center leading-[0] left-6 not-italic text-xs text-[rgba(255,255,255,0.5)] top-[85px] w-[198px]">
+                  <p className="leading-normal">Shortcuts and hidden features that make Zing faster &amp; more fun to use.</p>
+                </div>
+                <div className="absolute bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-8 left-6 rounded-xl top-[147px] w-[198px] cursor-pointer hover:bg-[rgba(32,33,35,0.5)] transition-colors">
+                  <div className="h-8 overflow-clip relative rounded-[inherit] w-[198px] flex items-center justify-center">
+                    <div className="flex flex-col font-bold justify-center leading-[0] not-italic text-xs text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">
+                      <p className="leading-normal">Explore tips</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Coming Soon Card */}
+            <div className="bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-[195px] relative rounded-xl shrink-0 w-[246px] hover:border-[rgba(43,48,59,0.8)] transition-colors">
+              <div className="h-[195px] overflow-clip relative rounded-[inherit] w-[246px]">
+                <div className="absolute bg-[rgba(15,15,15,0.2)] left-6 rounded-[80px] w-8 h-8 top-[16px]">
+                  <div className="absolute left-1/2 w-4 h-4 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <Image alt="" src="/67b80d60e981bceb660f43b472ce843a3ae702c9.png" fill className="object-cover" />
+                  </div>
+                </div>
+                <div className="absolute flex flex-col font-bold justify-center leading-[0] left-6 not-italic text-sm whitespace-nowrap text-white top-[54px]">
+                  <p className="leading-normal">Coming soon</p>
+                </div>
+                <div className="absolute flex flex-col font-normal justify-center leading-[0] left-6 not-italic text-xs text-[rgba(255,255,255,0.5)] top-[85px] w-[198px]">
+                  <p className="leading-normal">Get a sneak peek of features we&apos;re building next for Zing and Zashboard.</p>
+                </div>
+                <div className="absolute bg-[rgba(32,33,35,0.3)] border-[0.5px] border-[rgba(43,48,59,0.5)] border-solid h-8 left-6 rounded-xl top-[147px] w-[198px] cursor-pointer hover:bg-[rgba(32,33,35,0.5)] transition-colors">
+                  <div className="h-8 overflow-clip relative rounded-[inherit] w-[198px] flex items-center justify-center">
+                    <div className="flex flex-col font-bold justify-center leading-[0] not-italic text-xs text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">
+                      <p className="leading-normal">See what&apos;s next</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
