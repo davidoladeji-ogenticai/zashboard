@@ -18,6 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Zashboard - Zing Analytics",
   description: "Admin dashboard for Zing browser analytics and metrics",
+  icons: {
+    icon: "/ogenticai.png",
+  },
 };
 
 export default function RootLayout({
