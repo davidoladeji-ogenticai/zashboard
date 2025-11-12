@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server'
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
+  '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/landing(.*)',
   '/api/webhooks/clerk(.*)',
 ])
 
@@ -13,14 +13,9 @@ export default clerkMiddleware(async (auth, request) => {
   const { userId } = await auth()
   const { pathname } = request.nextUrl
 
-  // If accessing root without auth, redirect to landing
-  if (pathname === '/' && !userId) {
-    return NextResponse.redirect(new URL('/landing', request.url))
-  }
-
-  // If accessing auth routes while authenticated, redirect to dashboard
+  // If accessing auth routes while authenticated, redirect to dashboard (use /dashboard route)
   if ((pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')) && userId) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // Protect all routes except public ones

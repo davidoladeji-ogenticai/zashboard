@@ -1,0 +1,89 @@
+{
+  "family": "zashboard-app",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::235436273845:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::235436273845:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "zashboard-app",
+      "image": "235436273845.dkr.ecr.us-east-1.amazonaws.com/zashboard:latest",
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "PORT",
+          "value": "3000"
+        },
+        {
+          "name": "NEXT_PUBLIC_APP_PORT",
+          "value": "3000"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:DB_HOST::"
+        },
+        {
+          "name": "DB_PORT",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:DB_PORT::"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:DB_NAME::"
+        },
+        {
+          "name": "DB_USER",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:DB_USER::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:DB_PASSWORD::"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:JWT_SECRET::"
+        },
+        {
+          "name": "NEXTAUTH_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:NEXTAUTH_SECRET::"
+        },
+        {
+          "name": "NEXTAUTH_URL",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:NEXTAUTH_URL::"
+        },
+        {
+          "name": "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY::"
+        },
+        {
+          "name": "CLERK_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:CLERK_SECRET_KEY::"
+        },
+        {
+          "name": "CLERK_WEBHOOK_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:235436273845:secret:zashboard/env:CLERK_WEBHOOK_SECRET::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/zashboard-app",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

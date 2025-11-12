@@ -25,6 +25,7 @@ COPY . .
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y29uY2lzZS1ncm91cGVyLTk0LmNsZXJrLmFjY291bnRzLmRldiQ
 
 # Build the application
 RUN pnpm build

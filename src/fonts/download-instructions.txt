@@ -1,0 +1,9 @@
+To complete the landing page font setup:
+
+1. Download Satoshi font from: https://www.fontshare.com/fonts/satoshi
+2. Extract the font files and copy these three files to this directory:
+   - Satoshi-Regular.woff2
+   - Satoshi-Medium.woff2
+   - Satoshi-Bold.woff2
+
+Alternative: The design uses system fonts as fallback, so the page will still work without the custom font.

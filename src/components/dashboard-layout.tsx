@@ -11,7 +11,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
 
   // Pages that should not show sidebar (auth pages, landing, etc.)
-  const noSidebarPages = ['/login', '/register', '/forgot-password', '/landing']
+  const noSidebarPages = ['/', '/login', '/register', '/forgot-password']
   const isAuthPage = pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')
   const showSidebar = !noSidebarPages.includes(pathname) && !isAuthPage
 
