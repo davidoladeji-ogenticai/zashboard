@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { RealtimeMetrics } from '@/types/analytics'
 import { analyticsStore } from '@/lib/analytics-store'
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin authentication (replace with proper auth in production)
-    const authHeader = request.headers.get('authorization')
-    const expectedToken = process.env.ZING_ANALYTICS_KEY || 'demo-key'
-    
-    if (!authHeader || authHeader.replace('Bearer ', '') !== expectedToken) {
+    // Verify user authentication via Clerk
+    const user = await getAuthenticatedUser()
+
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized', code: 'AUTH_ERROR' },
         { status: 401 }
       )
     }
-
     // Get real-time metrics from stored events
     const realtimeMetrics: RealtimeMetrics = analyticsStore.getRealtimeMetrics()
 

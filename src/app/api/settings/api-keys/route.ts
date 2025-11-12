@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAuthHeader } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 import { generateToken } from '@/lib/auth'
-import { 
-  getApiKeys, 
-  createApiKey, 
-  deleteApiKey, 
-  regenerateApiKey 
+import {
+  getApiKeys,
+  createApiKey,
+  deleteApiKey,
+  regenerateApiKey
 } from '@/lib/database/api-keys'
 
 // GET - List all API keys
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Validate authentication
-    const authHeader = request.headers.get('authorization')
-    const user = validateAuthHeader(authHeader)
-    
+    const user = await getAuthenticatedUser()
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized access' },
@@ -60,9 +59,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Validate authentication
-    const authHeader = request.headers.get('authorization')
-    const user = validateAuthHeader(authHeader)
-    
+    const user = await getAuthenticatedUser()
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized access' },
@@ -119,9 +117,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Validate authentication
-    const authHeader = request.headers.get('authorization')
-    const user = validateAuthHeader(authHeader)
-    
+    const user = await getAuthenticatedUser()
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized access' },

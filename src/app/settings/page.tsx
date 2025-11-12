@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
+import { PlatformAdminGuard } from '@/components/platform-admin-guard'
 import { useSettingsMetrics, useApiKeys, useCreateApiKey, useDeleteApiKey, useRegenerateApiKey } from '@/hooks/useSettings'
 import {
   Settings,
@@ -24,17 +24,33 @@ import {
 } from 'lucide-react'
 
 export default function SettingsPage() {
-  const [newKeyName, setNewKeyName] = useState('')
-  const [showNewKeyForm, setShowNewKeyForm] = useState(false)
-  const [copiedKey, setCopiedKey] = useState('')
-  const [notification, setNotification] = useState({ message: '', type: '' })
-  
-  // Hooks for data fetching and mutations
   const { data: metrics, isLoading: isLoadingMetrics, error: metricsError } = useSettingsMetrics()
   const { data: apiKeys, isLoading: isLoadingKeys } = useApiKeys()
   const createApiKeyMutation = useCreateApiKey()
   const deleteApiKeyMutation = useDeleteApiKey()
   const regenerateApiKeyMutation = useRegenerateApiKey()
+
+  return (
+    <PlatformAdminGuard>
+      <SettingsContent
+        metrics={metrics}
+        isLoadingMetrics={isLoadingMetrics}
+        metricsError={metricsError}
+        apiKeys={apiKeys}
+        isLoadingKeys={isLoadingKeys}
+        createApiKeyMutation={createApiKeyMutation}
+        deleteApiKeyMutation={deleteApiKeyMutation}
+        regenerateApiKeyMutation={regenerateApiKeyMutation}
+      />
+    </PlatformAdminGuard>
+  )
+}
+
+function SettingsContent({ metrics, isLoadingMetrics, metricsError, apiKeys, isLoadingKeys, createApiKeyMutation, deleteApiKeyMutation, regenerateApiKeyMutation }: any) {
+  const [newKeyName, setNewKeyName] = useState('')
+  const [showNewKeyForm, setShowNewKeyForm] = useState(false)
+  const [copiedKey, setCopiedKey] = useState('')
+  const [notification, setNotification] = useState({ message: '', type: '' })
 
   // Utility functions
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -101,35 +117,29 @@ export default function SettingsPage() {
 
   if (metricsError) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Failed to Load Settings
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {metricsError.message}
-            </p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Failed to Load Settings
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {metricsError.message}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
+    <div className="flex flex-col h-full">
+      <Header />
         
         <main className="flex-1 overflow-y-auto p-6">
           {/* Notification */}
@@ -483,7 +493,6 @@ export default function SettingsPage() {
             </button>
           </div>
         </main>
-      </div>
     </div>
   )
 }

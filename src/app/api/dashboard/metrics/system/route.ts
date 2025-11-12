@@ -1,3 +1,4 @@
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 import { NextRequest, NextResponse } from 'next/server'
 import { analyticsStore } from '@/lib/analytics-store'
 import os from 'os'
@@ -6,9 +7,13 @@ import { promises as fs } from 'fs'
 export async function GET(request: NextRequest) {
   try {
     // Simple API authentication
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || (!authHeader.includes('demo-key') && !authHeader.startsWith('Bearer '))) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const user = await getAuthenticatedUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'AUTH_ERROR' },
+        { status: 401 }
+      )
     }
 
     // Get system health metrics from analytics store

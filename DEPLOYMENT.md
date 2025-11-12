@@ -1,31 +1,35 @@
-# Zashboard Production Deployment Guide
+# Zashboard AWS Deployment Guide
 
-This guide covers deploying Zashboard to production with a PostgreSQL database and proper configuration.
+This guide will help you deploy Zashboard to AWS and configure it for zashboard.ai domain.
 
-## Overview
+## Architecture Overview
 
-Zashboard is a Next.js application with:
-- Frontend dashboard built with React and Tailwind CSS
-- Backend API with JWT authentication
-- PostgreSQL database for data persistence
-- Real-time analytics processing
+The deployment uses:
+- **AWS ECS Fargate** - Containerized application hosting
+- **AWS RDS PostgreSQL** - Database
+- **AWS Application Load Balancer** - Traffic distribution and SSL termination
+- **AWS Route 53** - DNS management for zashboard.ai
+- **AWS ECR** - Docker image registry
+- **AWS Secrets Manager** - Secure credential storage
+- **AWS Certificate Manager** - SSL/TLS certificates
 
 ## Prerequisites
 
-### System Requirements
-- Node.js 18+ (recommended: 20+)
-- PostgreSQL 13+ (recommended: 15+)
-- Minimum 2GB RAM, 4GB recommended
-- 10GB+ disk space for database growth
+- AWS Account
+- AWS CLI installed and configured
+- Docker installed locally
+- Domain: zashboard.ai (registered)
+- PostgreSQL knowledge for database setup
 
-### Services Needed
-- **Web Hosting**: Vercel, Netlify, or custom server
-- **Database**: Managed PostgreSQL (AWS RDS, Google Cloud SQL, Supabase)
-- **Domain**: Custom domain with SSL certificate
+## Step 1: Setup AWS Infrastructure
 
-## Database Setup
+### 1.1 Create VPC (if needed)
+```bash
+# Create VPC with public and private subnets
+aws ec2 create-vpc --cidr-block 10.0.0.0/16
+```
 
-### Option 1: Managed Database (Recommended)
+### 1.2 Create RDS PostgreSQL Database
 
 #### AWS RDS PostgreSQL
 ```bash

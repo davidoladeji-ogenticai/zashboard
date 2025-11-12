@@ -31,9 +31,10 @@ export default function LoginPage() {
 
       if (data.success) {
         // Token is now stored in HTTP-only cookie automatically
-        // Store user data in localStorage for client-side access
+        // Also store token and user data in localStorage for client-side API calls
+        localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        
+
         // Get redirect URL from query params, default to dashboard
         const urlParams = new URLSearchParams(window.location.search)
         const redirectUrl = urlParams.get('redirect') || '/'

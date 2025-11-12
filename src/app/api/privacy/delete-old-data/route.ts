@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAuthHeader } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 import { analyticsStore } from '@/lib/analytics-store'
 
 export async function POST(request: NextRequest) {
   try {
     // Validate authentication
-    const authHeader = request.headers.get('authorization')
-    const user = validateAuthHeader(authHeader)
-    
+    const user = await getAuthenticatedUser()
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized access' },

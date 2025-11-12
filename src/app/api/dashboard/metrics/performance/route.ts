@@ -1,16 +1,15 @@
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 import { NextRequest, NextResponse } from 'next/server'
 import { analyticsStore } from '@/lib/analytics-store'
 
 // GET /api/dashboard/metrics/performance
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
-    
-    // For now, accept demo-key for backwards compatibility
-    // TODO: Replace with proper JWT authentication
-    if (!authHeader || (!authHeader.includes('demo-key') && !authHeader.startsWith('Bearer '))) {
+    const user = await getAuthenticatedUser()
+
+    if (!user) {
       return NextResponse.json(
-        { error: 'Unauthorized - Missing or invalid authorization header' },
+        { error: 'Unauthorized', code: 'AUTH_ERROR' },
         { status: 401 }
       )
     }

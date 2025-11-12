@@ -68,7 +68,6 @@ export function usePrivacyMetrics() {
       const response = await fetch(`${PRIVACY_BASE_URL}/metrics`, {
         credentials: 'include',
         headers: {
-          'Authorization': 'Bearer demo-key',
           'Content-Type': 'application/json'
         }
       })

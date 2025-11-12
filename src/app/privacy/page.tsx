@@ -1,8 +1,8 @@
 'use client'
 
-import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
+import { PlatformAdminGuard } from '@/components/platform-admin-guard'
 import { usePrivacyMetrics } from '@/hooks/usePrivacy'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
@@ -22,6 +22,15 @@ import {
 
 export default function PrivacyPage() {
   const { data: privacyData, isLoading, error } = usePrivacyMetrics()
+
+  return (
+    <PlatformAdminGuard>
+      <PrivacyContent privacyData={privacyData} isLoading={isLoading} error={error} />
+    </PlatformAdminGuard>
+  )
+}
+
+function PrivacyContent({ privacyData, isLoading, error }: any) {
   const [notification, setNotification] = useState({ message: '', type: '' })
 
   const showNotification = (message: string, type: 'success' | 'error') => {
@@ -89,35 +98,29 @@ export default function PrivacyPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-600 dark:text-gray-400" />
-              <p className="text-gray-600 dark:text-gray-400">Loading privacy metrics...</p>
-            </div>
-          </main>
-        </div>
+      <div className="flex flex-col h-full">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-600 dark:text-gray-400" />
+            <p className="text-gray-600 dark:text-gray-400">Loading privacy metrics...</p>
+          </div>
+        </main>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-red-600 dark:text-red-400" />
-              <p className="text-red-600 dark:text-red-400 mb-2">Failed to load privacy metrics</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{error.message}</p>
-            </div>
-          </main>
-        </div>
+      <div className="flex flex-col h-full">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-red-600 dark:text-red-400" />
+            <p className="text-red-600 dark:text-red-400 mb-2">Failed to load privacy metrics</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{error.message}</p>
+          </div>
+        </main>
       </div>
     )
   }
@@ -153,13 +156,9 @@ export default function PrivacyPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-6">
+    <div className="flex flex-col h-full">
+      <Header />
+      <main className="flex-1 overflow-y-auto p-6">
           {/* Page Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -467,7 +466,6 @@ export default function PrivacyPage() {
             </div>
           </div>
         </main>
-      </div>
     </div>
   )
 }

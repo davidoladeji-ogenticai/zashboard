@@ -1,17 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { validateAuthHeader } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get('authorization')
-    const user = validateAuthHeader(authHeader)
+    const user = await getAuthenticatedUser()
 
     if (!user) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Unauthorized. Please provide a valid token.' 
-        }, 
+        {
+          success: false,
+          error: 'Unauthorized. Please sign in.'
+        },
         { status: 401 }
       )
     }
@@ -26,11 +25,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Profile API error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Internal server error',
         timestamp: new Date().toISOString()
-      }, 
+      },
       { status: 500 }
     )
   }

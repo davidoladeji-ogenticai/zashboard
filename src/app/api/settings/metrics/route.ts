@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { validateAuthHeader, getAllUsers } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
+import { query } from '@/lib/database'
 import { analyticsStore } from '@/lib/analytics-store'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Validate authentication
-    const authHeader = request.headers.get('authorization')
-    const user = validateAuthHeader(authHeader)
-    
+    const user = await getAuthenticatedUser()
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized access' },
@@ -15,7 +15,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const allUsers = getAllUsers()
+    // Get all users from database
+    const usersResult = await query('SELECT COUNT(*) as count FROM users WHERE is_active = true')
+    const userCount = parseInt(usersResult.rows[0].count)
+
     const events = analyticsStore.getEvents()
     
     // Calculate storage metrics from analytics data
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     const metrics = {
-      admin_users: allUsers.length,
+      admin_users: userCount,
       api_keys: activeApiKeys,
       notifications_enabled: enabledNotifications.totalEnabled,
       data_retention_days: 90,

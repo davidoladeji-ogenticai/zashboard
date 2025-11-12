@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
 import { MetricCard } from '@/components/metric-card'
 import { useRealtimeMetrics, useAnalyticsHealth, useVersionMetrics, useUserMetrics } from '@/hooks/useAnalytics'
+import { useOrgPermissions } from '@/hooks/useOrgPermissions'
 import {
   Users,
   Activity,
@@ -19,41 +19,61 @@ import {
 } from 'lucide-react'
 
 export default function Home() {
+  const router = useRouter()
+  const { isPlatformAdmin, loading: permissionsLoading } = useOrgPermissions()
   const { data: realtimeData, isLoading: isLoadingRealtime, error: realtimeError } = useRealtimeMetrics()
   const { data: healthData, isLoading: isLoadingHealth } = useAnalyticsHealth()
   const { data: versionData } = useVersionMetrics()
   const { data: userData } = useUserMetrics()
 
+  // Redirect non-platform-admins to organizations page
+  useEffect(() => {
+    if (!permissionsLoading && !isPlatformAdmin) {
+      router.push('/organizations')
+    }
+  }, [permissionsLoading, isPlatformAdmin, router])
+
+  // Show loading while checking permissions
+  if (permissionsLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-600 dark:text-gray-400" />
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render content for non-admins (will redirect)
+  if (!isPlatformAdmin) {
+    return null
+  }
+
   if (realtimeError) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Failed to Load Analytics Data
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {realtimeError.message}
-            </p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Failed to Load Analytics Data
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {realtimeError.message}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
   }
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
+    <div className="flex flex-col h-full">
+      <Header />
         
         <main className="flex-1 overflow-y-auto p-6">
           {/* Page Header */}
@@ -243,7 +263,6 @@ export default function Home() {
             )}
           </div>
         </main>
-      </div>
     </div>
   )
 }

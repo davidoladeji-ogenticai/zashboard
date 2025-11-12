@@ -1,220 +1,169 @@
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+/**
+ * Authentication Types and Utilities
+ *
+ * NOTE: This file now only contains type definitions and utility functions.
+ * Actual authentication is handled by Clerk. See @/lib/auth-clerk for auth functions.
+ */
 
-// Temporary in-memory user storage (will be replaced with PostgreSQL)
-const users: Array<{
-  id: string
-  email: string
-  password: string
-  name: string
-  createdAt: Date
-  lastLogin?: Date
-}> = [
-  {
-    id: 'demo-user-123',
-    email: 'david@zashboard.ai',
-    password: '$2b$12$m.b0pb1meKFQK9z2VhKoVu1Tdlj/WocGjiSimgQE0pKeqCG5goZiu', // 'demo123'
-    name: 'David (Demo Admin)',
-    createdAt: new Date('2025-01-01'),
-    lastLogin: new Date()
-  }
-]
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
-const JWT_EXPIRES_IN = '7d'
+import { query } from './index'
 
 export interface User {
   id: string
   email: string
   name: string
-  createdAt: Date
-  lastLogin?: Date
+  created_at: Date
+  updated_at: Date
+  last_login?: Date
+  is_active: boolean
+  role: string
 }
 
 export interface AuthResponse {
   success: boolean
-  token?: string
   user?: User
   error?: string
 }
 
-// Hash password
-export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 12
-  return bcrypt.hash(password, saltRounds)
-}
-
-// Verify password
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword)
-}
-
-// Generate JWT token
-export function generateToken(userId: string): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
-}
-
-// Verify JWT token
-export function verifyToken(token: string): { userId: string } | null {
+// Get user by ID from database
+export async function getUserById(userId: string): Promise<User | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
-    return decoded
+    const result = await query(
+      'SELECT id, email, name, created_at, updated_at, last_login, is_active, role FROM users WHERE id = $1 AND is_active = true',
+      [userId]
+    )
+
+    if (result.rows.length === 0) {
+      return null
+    }
+
+    return result.rows[0]
   } catch (error) {
+    console.error('Failed to get user by ID:', error)
     return null
   }
 }
 
-// Create user
-export async function createUser(email: string, password: string, name: string): Promise<AuthResponse> {
-  try {
-    // Check if user already exists
-    const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase())
-    if (existingUser) {
-      return {
-        success: false,
-        error: 'User already exists with this email'
-      }
-    }
-
-    // Validate input
-    if (!email || !password || !name) {
-      return {
-        success: false,
-        error: 'Email, password, and name are required'
-      }
-    }
-
-    if (password.length < 6) {
-      return {
-        success: false,
-        error: 'Password must be at least 6 characters long'
-      }
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return {
-        success: false,
-        error: 'Invalid email format'
-      }
-    }
-
-    // Hash password and create user
-    const hashedPassword = await hashPassword(password)
-    const user = {
-      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      email: email.toLowerCase().trim(),
-      password: hashedPassword,
-      name: name.trim(),
-      createdAt: new Date()
-    }
-
-    users.push(user)
-
-    // Generate token
-    const token = generateToken(user.id)
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user
-    
-    return {
-      success: true,
-      token,
-      user: userWithoutPassword
-    }
-
-  } catch (error) {
-    console.error('Create user error:', error)
-    return {
-      success: false,
-      error: 'Failed to create user'
-    }
-  }
-}
-
-// Authenticate user
-export async function authenticateUser(email: string, password: string): Promise<AuthResponse> {
-  try {
-    // Find user
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase())
-    if (!user) {
-      return {
-        success: false,
-        error: 'Invalid email or password'
-      }
-    }
-
-    // Verify password
-    const isValidPassword = await verifyPassword(password, user.password)
-    if (!isValidPassword) {
-      return {
-        success: false,
-        error: 'Invalid email or password'
-      }
-    }
-
-    // Update last login
-    user.lastLogin = new Date()
-
-    // Generate token
-    const token = generateToken(user.id)
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user
-    
-    return {
-      success: true,
-      token,
-      user: userWithoutPassword
-    }
-
-  } catch (error) {
-    console.error('Authentication error:', error)
-    return {
-      success: false,
-      error: 'Authentication failed'
-    }
-  }
-}
-
-// Get user by ID
-export function getUserById(userId: string): User | null {
-  const user = users.find(u => u.id === userId)
-  if (!user) return null
-
-  const { password: _, ...userWithoutPassword } = user
-  return userWithoutPassword
-}
-
 // Get all users (admin only)
-export function getAllUsers(): User[] {
-  return users.map(user => {
-    const { password: _, ...userWithoutPassword } = user
-    return userWithoutPassword
-  })
+export async function getAllUsers(): Promise<User[]> {
+  try {
+    const result = await query(
+      'SELECT id, email, name, created_at, updated_at, last_login, is_active, role FROM users ORDER BY created_at DESC'
+    )
+
+    return result.rows
+  } catch (error) {
+    console.error('Failed to get all users:', error)
+    return []
+  }
 }
 
-// Validate auth header and return user
-export function validateAuthHeader(authHeader: string | null): User | null {
+/**
+ * DEPRECATED: validateAuthHeader
+ * Use getAuthenticatedUser from @/lib/auth-clerk instead
+ *
+ * This function is kept temporarily for backward compatibility during migration.
+ */
+export async function validateAuthHeader(authHeader: string | null): Promise<User | null> {
+  console.warn('validateAuthHeader is deprecated. Use getAuthenticatedUser from @/lib/auth-clerk instead.')
+
   if (!authHeader) return null
-  
+
   // Handle demo key for development
   if (authHeader.includes('demo-key')) {
     return {
       id: 'demo-user',
-      email: 'david@zashboard.ai',
-      name: 'David (Demo Admin)',
-      createdAt: new Date()
+      email: 'demo@zashboard.com',
+      name: 'Demo User',
+      created_at: new Date(),
+      updated_at: new Date(),
+      is_active: true,
+      role: 'user'
     }
   }
 
-  // Handle Bearer token
-  if (!authHeader.startsWith('Bearer ')) return null
-  
-  const token = authHeader.substring(7)
-  const decoded = verifyToken(token)
-  if (!decoded) return null
-  
-  return getUserById(decoded.userId)
+  return null
+}
+
+// Update user profile
+export async function updateUserProfile(userId: string, updates: {
+  name?: string
+  email?: string
+}): Promise<AuthResponse> {
+  try {
+    const setClause = []
+    const values = []
+    let paramCount = 1
+
+    if (updates.name) {
+      setClause.push(`name = $${paramCount}`)
+      values.push(updates.name.trim())
+      paramCount++
+    }
+
+    if (updates.email) {
+      // Check if email is already taken
+      const existingUser = await query(
+        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        [updates.email.toLowerCase().trim(), userId]
+      )
+
+      if (existingUser.rows.length > 0) {
+        return {
+          success: false,
+          error: 'Email is already taken'
+        }
+      }
+
+      setClause.push(`email = $${paramCount}`)
+      values.push(updates.email.toLowerCase().trim())
+      paramCount++
+    }
+
+    if (setClause.length === 0) {
+      return {
+        success: false,
+        error: 'No updates provided'
+      }
+    }
+
+    setClause.push(`updated_at = NOW()`)
+    values.push(userId)
+
+    const result = await query(`
+      UPDATE users SET ${setClause.join(', ')}
+      WHERE id = $${paramCount}
+      RETURNING id, email, name, created_at, updated_at, last_login, is_active, role
+    `, values)
+
+    if (result.rows.length === 0) {
+      return {
+        success: false,
+        error: 'User not found'
+      }
+    }
+
+    return {
+      success: true,
+      user: result.rows[0]
+    }
+  } catch (error) {
+    console.error('Failed to update user profile:', error)
+    return {
+      success: false,
+      error: 'Failed to update profile'
+    }
+  }
+}
+
+/**
+ * DEPRECATED: changePassword
+ * Password management is now handled by Clerk.
+ * Users should update their password through Clerk's user settings.
+ */
+export async function changePassword(userId: string, currentPassword: string, newPassword: string): Promise<AuthResponse> {
+  console.warn('changePassword is deprecated. Password management is handled by Clerk.')
+  return {
+    success: false,
+    error: 'Password management is now handled through your account settings. Please sign in to update your password.'
+  }
 }

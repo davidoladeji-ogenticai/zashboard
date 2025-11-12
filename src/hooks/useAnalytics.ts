@@ -4,10 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { RealtimeMetrics, HistoricalData } from '@/types/analytics'
 
 const API_BASE_URL = '/api'
-const API_KEY = process.env.NEXT_PUBLIC_ZING_ANALYTICS_KEY || 'demo-key'
 
 const apiHeaders = {
-  'Authorization': `Bearer ${API_KEY}`,
   'Content-Type': 'application/json'
 }
 

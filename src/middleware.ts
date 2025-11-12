@@ -1,74 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
-)
+// Define public routes that don't require authentication
+const isPublicRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/landing(.*)',
+  '/api/webhooks/clerk(.*)',
+])
 
-const protectedRoutes = [
-  '/',
-  '/users',
-  '/performance', 
-  '/geographic',
-  '/versions',
-  '/settings',
-  '/system',
-  '/privacy'
-]
-
-const authRoutes = ['/login', '/register']
-
-export async function middleware(request: NextRequest) {
+export default clerkMiddleware(async (auth, request) => {
+  const { userId } = await auth()
   const { pathname } = request.nextUrl
-  const token = request.cookies.get('auth_token')?.value
 
-  // Check if this is a protected route
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname === route || pathname.startsWith(`${route}/`)
-  )
-  
-  // Check if this is an auth route
-  const isAuthRoute = authRoutes.includes(pathname)
-
-  // If accessing root, redirect to landing page when not authenticated
-  if (pathname === '/' && !token) {
+  // If accessing root without auth, redirect to landing
+  if (pathname === '/' && !userId) {
     return NextResponse.redirect(new URL('/landing', request.url))
   }
 
-  // If accessing protected routes without token, redirect to login
-  if (isProtectedRoute && !token) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  // If accessing auth routes while authenticated, redirect to dashboard
+  if ((pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')) && userId) {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // If accessing auth routes with valid token, redirect to dashboard
-  if (isAuthRoute && token) {
-    try {
-      await jwtVerify(token, JWT_SECRET)
-      return NextResponse.redirect(new URL('/', request.url))
-    } catch {
-      // Token invalid, continue to auth page
-    }
-  }
-
-  // Verify token for protected routes
-  if (isProtectedRoute && token) {
-    try {
-      await jwtVerify(token, JWT_SECRET)
-    } catch {
-      // Token invalid, redirect to login
-      const response = NextResponse.redirect(new URL('/login', request.url))
-      response.cookies.delete('auth_token')
-      return response
-    }
+  // Protect all routes except public ones
+  if (!isPublicRoute(request) && !userId) {
+    const signInUrl = new URL('/sign-in', request.url)
+    signInUrl.searchParams.set('redirect_url', pathname)
+    return NextResponse.redirect(signInUrl)
   }
 
   return NextResponse.next()
-}
+})
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|landing).*)',
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 }

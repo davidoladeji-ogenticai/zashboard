@@ -1,3 +1,4 @@
+import { getAuthenticatedUser } from '@/lib/auth-clerk'
 import { NextRequest, NextResponse } from 'next/server'
 import { HistoricalData } from '@/types/analytics'
 import { subDays, format } from 'date-fns'
@@ -6,10 +7,9 @@ import { analyticsStore } from '@/lib/analytics-store'
 export async function GET(request: NextRequest) {
   try {
     // Verify admin authentication
-    const authHeader = request.headers.get('authorization')
-    const expectedToken = process.env.ZING_ANALYTICS_KEY || 'demo-key'
-    
-    if (!authHeader || authHeader.replace('Bearer ', '') !== expectedToken) {
+    const user = await getAuthenticatedUser()
+
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized', code: 'AUTH_ERROR' },
         { status: 401 }

@@ -39,7 +39,6 @@ export function useSettingsMetrics() {
       const response = await fetch(`${SETTINGS_BASE_URL}/metrics`, {
         credentials: 'include', // Include cookies in request
         headers: {
-          'Authorization': 'Bearer demo-key', // Fallback for API endpoints that check auth header
           'Content-Type': 'application/json'
         }
       })
@@ -64,7 +63,6 @@ export function useApiKeys() {
       const response = await fetch(`${SETTINGS_BASE_URL}/api-keys`, {
         credentials: 'include',
         headers: {
-          'Authorization': 'Bearer demo-key',
           'Content-Type': 'application/json'
         }
       })
@@ -90,7 +88,6 @@ export function useCreateApiKey() {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Authorization': 'Bearer demo-key',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(keyData)
@@ -121,7 +118,6 @@ export function useDeleteApiKey() {
         method: 'DELETE',
         credentials: 'include',
         headers: {
-          'Authorization': 'Bearer demo-key',
           'Content-Type': 'application/json'
         }
       })
@@ -154,17 +150,15 @@ export function useRegenerateApiKey() {
         method: 'DELETE',
         credentials: 'include',
         headers: {
-          'Authorization': 'Bearer demo-key',
           'Content-Type': 'application/json'
         }
       })
-      
+
       // Create new key
       const response = await fetch(`${SETTINGS_BASE_URL}/api-keys`, {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Authorization': 'Bearer demo-key',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name: keyData.name })

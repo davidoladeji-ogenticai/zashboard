@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs
+*.log
+dev.log
+
+# database
+*.sql.backup
+
+# scripts (temporary/migration)
+fix-sidebar-pages.sh

@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zashboard-postgres
+    environment:
+      POSTGRES_DB: zashboard
+      POSTGRES_USER: zashboard_user
+      POSTGRES_PASSWORD: zashboard_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zashboard_user -d zashboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zashboard-app
+    ports:
+      - "3000:3000"
+    environment:
+      # Application
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_APP_PORT: 3000
+
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: zashboard
+      DB_USER: zashboard_user
+      DB_PASSWORD: zashboard_password
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+
+      # NextAuth
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-here}
+
+      # Analytics
+      ZING_ANALYTICS_KEY: ${ZING_ANALYTICS_KEY:-demo-key}
+      NEXT_PUBLIC_ZING_ANALYTICS_KEY: ${NEXT_PUBLIC_ZING_ANALYTICS_KEY:-demo-key}
+
+      # OAuth (optional)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
