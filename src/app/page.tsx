@@ -2,30 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import localFont from 'next/font/local'
 import { useState, useEffect } from 'react'
-
-const satoshi = localFont({
-  src: [
-    {
-      path: '../../fonts/Satoshi-Regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../../fonts/Satoshi-Medium.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../../fonts/Satoshi-Bold.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-satoshi',
-  fallback: ['system-ui', 'sans-serif'],
-})
 
 const carouselSlides = [
   {
@@ -52,7 +29,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className={`${satoshi.variable} font-[family-name:var(--font-satoshi)] bg-[#0f0f0f] relative min-h-screen w-full overflow-x-hidden`}>
+    <div className="font-sans bg-[#0f0f0f] relative min-h-screen w-full overflow-x-hidden">
       {/* Logo and Navigation */}
       <div className="absolute flex gap-1 items-center left-8 top-8">
         <div className="relative shrink-0 w-10 h-10">
