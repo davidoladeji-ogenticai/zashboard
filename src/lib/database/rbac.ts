@@ -54,7 +54,7 @@ export interface UserWithRoles {
   id: string
   email: string
   name: string
-  registration_source: 'zing' | 'web'
+  registration_source: 'zing_browser' | 'zashboard' | 'ogents_builder'
   roles: Role[]
   permissions: Permission[]
 }

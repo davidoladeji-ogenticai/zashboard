@@ -7,15 +7,22 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks/clerk(.*)',
+  '/api/agents/slack/events(.*)',
+  '/api/agents/slack/oauth(.*)',
 ])
 
 export default clerkMiddleware(async (auth, request) => {
   const { userId } = await auth()
   const { pathname } = request.nextUrl
 
-  // If accessing auth routes while authenticated, redirect to dashboard (use /dashboard route)
+  // If authenticated and on landing page, redirect to organizations
+  if (pathname === '/' && userId) {
+    return NextResponse.redirect(new URL('/organizations', request.url))
+  }
+
+  // If accessing auth routes while authenticated, redirect to organizations
   if ((pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')) && userId) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/organizations', request.url))
   }
 
   // Protect all routes except public ones

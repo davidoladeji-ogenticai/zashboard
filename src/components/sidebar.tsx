@@ -47,20 +47,23 @@ export function Sidebar() {
 
   // Build navigation dynamically based on permissions
   const navigation: NavItem[] = [
-    // Platform-level pages - only for platform admins
-    ...(isPlatformAdmin ? [
-      { name: 'Overview', href: '/', icon: BarChart3 },
-      {
-        name: 'Analytics',
-        icon: LineChart,
-        submenu: [
-          { name: 'Users', href: '/analytics/users', icon: Users },
-          { name: 'Geographic', href: '/analytics/geographic', icon: Globe },
-          { name: 'Performance', href: '/analytics/performance', icon: Activity },
-          { name: 'Versions', href: '/analytics/versions', icon: TrendingUp },
-        ]
-      },
-    ] : []),
+    // Overview - visible to all users
+    {
+      name: 'Overview',
+      href: '/overview',
+      icon: BarChart3
+    },
+    // Analytics - only for platform admins
+    ...(isPlatformAdmin ? [{
+      name: 'Analytics',
+      icon: LineChart,
+      submenu: [
+        { name: 'Users', href: '/analytics/users', icon: Users },
+        { name: 'Geographic', href: '/analytics/geographic', icon: Globe },
+        { name: 'Performance', href: '/analytics/performance', icon: Activity },
+        { name: 'Versions', href: '/analytics/versions', icon: TrendingUp },
+      ]
+    }] : []),
     // Organizations menu - visible to all authenticated users
     {
       name: 'Organizations',

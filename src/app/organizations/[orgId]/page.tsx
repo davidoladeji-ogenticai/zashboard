@@ -19,11 +19,20 @@ interface Organization {
   updated_at: string
 }
 
+interface AgentDeployment {
+  id: string
+  agent_type: string
+  status: string
+  deployed_at: string | null
+  slack_team_name: string | null
+}
+
 export default function OrganizationDetailPage({ params }: { params: Promise<{ orgId: string }> }) {
   const router = useRouter()
   const { orgId } = use(params)
   const permissions = useOrgPermissions(orgId)
   const [organization, setOrganization] = useState<Organization | null>(null)
+  const [agents, setAgents] = useState<AgentDeployment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,19 +50,30 @@ export default function OrganizationDetailPage({ params }: { params: Promise<{ o
 
   async function loadOrganization() {
     try {
-      const response = await fetch(`/api/organizations/${orgId}`)
+      const [orgResponse, agentsResponse] = await Promise.all([
+        fetch(`/api/organizations/${orgId}`),
+        fetch(`/api/organizations/${orgId}/agents`)
+      ])
 
-      if (response.status === 401) {
+      if (orgResponse.status === 401) {
         router.push('/sign-in')
         return
       }
 
-      const data = await response.json()
+      const orgData = await orgResponse.json()
 
-      if (data.success) {
-        setOrganization(data.data)
+      if (orgData.success) {
+        setOrganization(orgData.data)
       } else {
-        setError(data.error || 'Failed to load organization')
+        setError(orgData.error || 'Failed to load organization')
+      }
+
+      // Load agents (non-critical, don't fail if this errors)
+      if (agentsResponse.ok) {
+        const agentsData = await agentsResponse.json()
+        if (agentsData.success) {
+          setAgents(agentsData.agents || [])
+        }
       }
     } catch (err) {
       console.error('Error loading organization:', err)
@@ -218,6 +238,60 @@ export default function OrganizationDetailPage({ params }: { params: Promise<{ o
                 </p>
               )}
             </div>
+
+            {/* Deployed Agents */}
+            {agents.length > 0 && (
+              <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Deployed Agents
+                  </h2>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {agents.length} {agents.length === 1 ? 'agent' : 'agents'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {agents.map((agent) => (
+                    <button
+                      key={agent.id}
+                      onClick={() => router.push(`/organizations/${orgId}/agents/${agent.id}`)}
+                      className="flex items-start p-4 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-colors text-left group"
+                    >
+                      <div className="flex-shrink-0 mr-3">
+                        <div className="h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                          <span className="text-2xl">📚</span>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            Slack Knowledge Agent
+                          </h3>
+                          <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            agent.status === 'active'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                          }`}>
+                            {agent.status}
+                          </span>
+                        </div>
+                        {agent.slack_team_name && (
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                            {agent.slack_team_name}
+                          </p>
+                        )}
+                        {agent.deployed_at && (
+                          <p className="text-xs text-gray-500 dark:text-gray-500">
+                            Deployed {new Date(agent.deployed_at).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <ArrowLeft className="h-4 w-4 text-gray-400 transform rotate-180 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all ml-2" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Organization Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

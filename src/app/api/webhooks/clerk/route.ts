@@ -65,7 +65,11 @@ export async function POST(req: Request) {
         // Get platform role from metadata (defaults to 'user' if not set)
         const platformRole = (public_metadata as any)?.platform_role || 'user'
 
-        // Insert user into database with platform role
+        // Get signup source from Clerk metadata (defaults to 'zashboard')
+        // Valid sources: 'zing_browser', 'zashboard', 'ogents_builder'
+        const signupSource = (public_metadata as any)?.signupSource || 'zashboard'
+
+        // Insert user into database with platform role and signup source
         await query(
           `INSERT INTO users (
             id,
@@ -82,11 +86,12 @@ export async function POST(req: Request) {
             email = EXCLUDED.email,
             name = EXCLUDED.name,
             role = EXCLUDED.role,
+            registration_source = EXCLUDED.registration_source,
             updated_at = NOW()`,
-          [id, email, name, platformRole, 'web', new Date(created_at)]
+          [id, email, name, platformRole, signupSource, new Date(created_at)]
         )
 
-        console.log(`User created: ${email} (${id}) with platform role: ${platformRole}`)
+        console.log(`User created: ${email} (${id}) with platform role: ${platformRole}, source: ${signupSource}`)
         break
       }
 
